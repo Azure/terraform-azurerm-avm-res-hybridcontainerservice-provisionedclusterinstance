@@ -114,12 +114,6 @@ Description: The name of the hybrid aks
 
 Type: `string`
 
-### <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name)
-
-Description: The name of the HCI cluster. Must be the same as the name when preparing AD.
-
-Type: `string`
-
 ### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
 
 Description: The name of the custom location.
