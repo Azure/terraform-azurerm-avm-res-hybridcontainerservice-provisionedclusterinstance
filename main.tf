@@ -35,7 +35,7 @@ resource "azapi_resource" "connected_cluster" {
     properties = {
       aadProfile = {
         adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
-        enable_azure_rbac   = var.enable_azure_rbac
+        enableAzureRBAC     = var.enable_azure_rbac
         tenantID            = data.azurerm_client_config.current.tenant_id
       }
       agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
