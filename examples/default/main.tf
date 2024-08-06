@@ -9,10 +9,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.74"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
   }
 }
 
@@ -55,13 +51,6 @@ data "azurerm_key_vault" "deployment_key_vault" {
   name                = var.keyvault_name
   resource_group_name = var.resource_group_name
 }
-
-data "azapi_resource" "arcbridge" {
-  type      = "Microsoft.ResourceConnector/appliances@2022-10-27"
-  name      = "${var.cluster_name}-arcbridge"
-  parent_id = data.azurerm_resource_group.rg.id
-}
-
 
 # This is the module call
 # Do not specify location here due to the randomization above.
