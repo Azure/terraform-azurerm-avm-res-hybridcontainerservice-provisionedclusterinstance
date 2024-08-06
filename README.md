@@ -25,21 +25,23 @@ The following requirements are needed by this module:
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
+- <a name="requirement_tls"></a> [tls](#requirement\_tls) (>= 3.1)
+
 ## Resources
 
 The following resources are used by this module:
 
-- [azapi_resource.connectedCluster](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
-- [azapi_resource.provisionedClusterInstance](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
-- [azurerm_key_vault_secret.sshPrivateKeyPem](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
-- [azurerm_key_vault_secret.sshPublicKey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
+- [azapi_resource.connected_cluster](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.provisioned_cluster_instance](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azurerm_key_vault_secret.ssh_private_key_pem](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
+- [azurerm_key_vault_secret.ssh_public_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [terraform_data.replacement](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
-- [terraform_data.waitAksVhdReady](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
-- [tls_private_key.rsaKey](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) (resource)
+- [terraform_data.wait_aks_vhd_ready](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
+- [tls_private_key.rsa_key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
@@ -50,7 +52,7 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_agentPoolProfiles"></a> [agentPoolProfiles](#input\_agentPoolProfiles)
+### <a name="input_agent_pool_profiles"></a> [agent\_pool\_profiles](#input\_agent\_pool\_profiles)
 
 Description: The agent pool profiles
 
@@ -70,19 +72,13 @@ list(object({
   }))
 ```
 
-### <a name="input_arbId"></a> [arbId](#input\_arbId)
-
-Description: The id of the arc bridge resource, this is used to update hybrid aks extension
-
-Type: `string`
-
-### <a name="input_controlPlaneIp"></a> [controlPlaneIp](#input\_controlPlaneIp)
+### <a name="input_control_plane_ip"></a> [control\_plane\_ip](#input\_control\_plane\_ip)
 
 Description: The ip address of the control plane
 
 Type: `string`
 
-### <a name="input_customLocationId"></a> [customLocationId](#input\_customLocationId)
+### <a name="input_custom_location_id"></a> [custom\_location\_id](#input\_custom\_location\_id)
 
 Description: The id of the Custom location that used to create hybrid aks
 
@@ -94,7 +90,7 @@ Description: Azure region where the resource should be deployed.
 
 Type: `string`
 
-### <a name="input_logicalNetworkId"></a> [logicalNetworkId](#input\_logicalNetworkId)
+### <a name="input_logical_network_id"></a> [logical\_network\_id](#input\_logical\_network\_id)
 
 Description: The id of the logical network that the AKS nodes will be connected to.
 
@@ -116,7 +112,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_controlPlaneCount"></a> [controlPlaneCount](#input\_controlPlaneCount)
+### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
 
 Description: The count of the control plane
 
@@ -124,7 +120,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_controlPlaneVmSize"></a> [controlPlaneVmSize](#input\_controlPlaneVmSize)
+### <a name="input_control_plane_vm_size"></a> [control\_plane\_vm\_size](#input\_control\_plane\_vm\_size)
 
 Description: The size of the control plane VM
 
@@ -156,41 +152,7 @@ object({
 
 Default: `null`
 
-### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
-
-Description: A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-
-Type:
-
-```hcl
-map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
-```
-
-Default: `{}`
-
-### <a name="input_enableAzureRBAC"></a> [enableAzureRBAC](#input\_enableAzureRBAC)
+### <a name="input_enable_azure_rbac"></a> [enable\_azure\_rbac](#input\_enable\_azure\_rbac)
 
 Description: Enable Azure RBAC for the kubernetes cluster
 
@@ -208,15 +170,15 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_isExported"></a> [isExported](#input\_isExported)
+### <a name="input_is_exported"></a> [is\_exported](#input\_is\_exported)
 
-Description: n/a
+Description: Indicates whether the resource is exported
 
 Type: `bool`
 
 Default: `false`
 
-### <a name="input_kubernetesVersion"></a> [kubernetesVersion](#input\_kubernetesVersion)
+### <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version)
 
 Description: The kubernetes version
 
@@ -260,7 +222,7 @@ object({
 
 Default: `{}`
 
-### <a name="input_podCidr"></a> [podCidr](#input\_podCidr)
+### <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr)
 
 Description: The CIDR range for the pods in the kubernetes cluster
 
@@ -268,7 +230,7 @@ Type: `string`
 
 Default: `"10.244.0.0/16"`
 
-### <a name="input_rbacAdminGroupObjectIds"></a> [rbacAdminGroupObjectIds](#input\_rbacAdminGroupObjectIds)
+### <a name="input_rbac_admin_group_object_ids"></a> [rbac\_admin\_group\_object\_ids](#input\_rbac\_admin\_group\_object\_ids)
 
 Description: The object id of the admin group of the azure rbac
 
@@ -306,7 +268,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_sshKeyVaultId"></a> [sshKeyVaultId](#input\_sshKeyVaultId)
+### <a name="input_ssh_key_vault_id"></a> [ssh\_key\_vault\_id](#input\_ssh\_key\_vault\_id)
 
 Description: The id of the key vault that contains the SSH public and private keys.
 
@@ -314,7 +276,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_sshPrivateKeyPemSecretName"></a> [sshPrivateKeyPemSecretName](#input\_sshPrivateKeyPemSecretName)
+### <a name="input_ssh_private_key_pem_secret_name"></a> [ssh\_private\_key\_pem\_secret\_name](#input\_ssh\_private\_key\_pem\_secret\_name)
 
 Description: The name of the secret in the key vault that contains the SSH private key PEM.
 
@@ -322,7 +284,7 @@ Type: `string`
 
 Default: `"AksArcAgentSshPrivateKeyPem"`
 
-### <a name="input_sshPublicKey"></a> [sshPublicKey](#input\_sshPublicKey)
+### <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key)
 
 Description: The SSH public key that will be used to access the kubernetes cluster nodes. If not specified, a new SSH key pair will be generated.
 
@@ -330,7 +292,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_sshPublicKeySecretName"></a> [sshPublicKeySecretName](#input\_sshPublicKeySecretName)
+### <a name="input_ssh_public_key_secret_name"></a> [ssh\_public\_key\_secret\_name](#input\_ssh\_public\_key\_secret\_name)
 
 Description: The name of the secret in the key vault that contains the SSH public key.
 
@@ -350,7 +312,7 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_aksCluster"></a> [aksCluster](#output\_aksCluster)
+### <a name="output_aks_cluster"></a> [aks\_cluster](#output\_aks\_cluster)
 
 Description: AKS Arc Cluster instance
 
@@ -358,9 +320,9 @@ Description: AKS Arc Cluster instance
 
 Description: AKS Arc Provisioned Cluster instance
 
-### <a name="output_rsaPrivateKey"></a> [rsaPrivateKey](#output\_rsaPrivateKey)
+### <a name="output_rsa_private_key"></a> [rsa\_private\_key](#output\_rsa\_private\_key)
 
-Description: Module owners should include the full resource via a 'resource' output https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
+Description: The RSA private key
 
 ## Modules
 

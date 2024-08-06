@@ -15,10 +15,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.74"
     }
-    modtm = {
-      source  = "azure/modtm"
-      version = "~> 0.3"
-    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
@@ -38,13 +34,6 @@ module "regions" {
   version = "~> 0.1"
 }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
@@ -58,24 +47,24 @@ data "azurerm_resource_group" "rg" {
 
 data "azapi_resource" "customlocation" {
   type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
-  name      = var.customLocationName
+  name      = var.custom_location_name
   parent_id = data.azurerm_resource_group.rg.id
 }
 
-data "azapi_resource" "logicalNetwork" {
+data "azapi_resource" "logical_network" {
   type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
-  name      = var.logicalNetworkName
+  name      = var.logical_network_name
   parent_id = data.azurerm_resource_group.rg.id
 }
 
-data "azurerm_key_vault" "DeploymentKeyVault" {
-  name                = var.keyvaultName
+data "azurerm_key_vault" "deployment_key_vault" {
+  name                = var.keyvault_name
   resource_group_name = var.resource_group_name
 }
 
 data "azapi_resource" "arcbridge" {
   type      = "Microsoft.ResourceConnector/appliances@2022-10-27"
-  name      = "${var.clusterName}-arcbridge"
+  name      = "${var.cluster_name}-arcbridge"
   parent_id = data.azurerm_resource_group.rg.id
 }
 
@@ -89,20 +78,19 @@ module "test" {
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
   location            = data.azurerm_resource_group.rg.location
-  name                = var.aksArcName
+  name                = var.aks_arc_name
   resource_group_name = data.azurerm_resource_group.rg.name
 
   enable_telemetry = var.enable_telemetry # see variables.tf
 
-  customLocationId        = data.azapi_resource.customlocation.id
-  logicalNetworkId        = data.azapi_resource.logicalNetwork.id
-  agentPoolProfiles       = var.agentPoolProfiles
-  sshKeyVaultId           = data.azurerm_key_vault.DeploymentKeyVault.id
-  controlPlaneIp          = "192.168.1.190"
-  arbId                   = data.azapi_resource.arcbridge.id
-  kubernetesVersion       = "1.28.5"
-  controlPlaneCount       = 1
-  rbacAdminGroupObjectIds = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
+  custom_location_id          = data.azapi_resource.customlocation.id
+  logical_network_id          = data.azapi_resource.logical_network.id
+  agent_pool_profiles         = var.agent_pool_profiles
+  ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
+  control_plane_ip            = "192.168.1.190"
+  kubernetes_version          = "1.28.5"
+  control_plane_count         = 1
+  rbac_admin_group_object_ids = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
 }
 ```
 
@@ -117,19 +105,16 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
 
-- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
-
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
-- [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [azapi_resource.arcbridge](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
 - [azapi_resource.customlocation](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
-- [azapi_resource.logicalNetwork](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
-- [azurerm_key_vault.DeploymentKeyVault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) (data source)
+- [azapi_resource.logical_network](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azurerm_key_vault.deployment_key_vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) (data source)
 - [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -137,31 +122,31 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_aksArcName"></a> [aksArcName](#input\_aksArcName)
+### <a name="input_aks_arc_name"></a> [aks\_arc\_name](#input\_aks\_arc\_name)
 
 Description: The name of the hybrid aks
 
 Type: `string`
 
-### <a name="input_clusterName"></a> [clusterName](#input\_clusterName)
+### <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name)
 
 Description: The name of the HCI cluster. Must be the same as the name when preparing AD.
 
 Type: `string`
 
-### <a name="input_customLocationName"></a> [customLocationName](#input\_customLocationName)
+### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
 
 Description: The name of the custom location.
 
 Type: `string`
 
-### <a name="input_keyvaultName"></a> [keyvaultName](#input\_keyvaultName)
+### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
 
 Description: The name of the key vault.
 
 Type: `string`
 
-### <a name="input_logicalNetworkName"></a> [logicalNetworkName](#input\_logicalNetworkName)
+### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
 
 Description: The name of the logical network
 
@@ -177,7 +162,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_agentPoolProfiles"></a> [agentPoolProfiles](#input\_agentPoolProfiles)
+### <a name="input_agent_pool_profiles"></a> [agent\_pool\_profiles](#input\_agent\_pool\_profiles)
 
 Description: The agent pool profiles for the Kubernetes cluster.
 

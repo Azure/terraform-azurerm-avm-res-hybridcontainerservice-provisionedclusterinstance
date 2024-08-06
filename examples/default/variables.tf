@@ -1,29 +1,29 @@
-variable "aksArcName" {
+variable "aks_arc_name" {
   type        = string
   description = "The name of the hybrid aks"
 }
 
-variable "clusterName" {
+variable "cluster_name" {
   type        = string
   description = "The name of the HCI cluster. Must be the same as the name when preparing AD."
 
   validation {
-    condition     = length(var.clusterName) < 16 && length(var.clusterName) > 0
-    error_message = "value of clusterName should be less than 16 characters and greater than 0 characters"
+    condition     = length(var.cluster_name) < 16 && length(var.cluster_name) > 0
+    error_message = "value of cluster_name should be less than 16 characters and greater than 0 characters"
   }
 }
 
-variable "customLocationName" {
+variable "custom_location_name" {
   type        = string
   description = "The name of the custom location."
 }
 
-variable "keyvaultName" {
+variable "keyvault_name" {
   type        = string
   description = "The name of the key vault."
 }
 
-variable "logicalNetworkName" {
+variable "logical_network_name" {
   type        = string
   description = "The name of the logical network"
 }
@@ -33,7 +33,7 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
-variable "agentPoolProfiles" {
+variable "agent_pool_profiles" {
   type = list(object({
     count             = number
     enableAutoScaling = optional(bool, false)

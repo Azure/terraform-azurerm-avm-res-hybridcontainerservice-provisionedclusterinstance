@@ -38,51 +38,6 @@ A map describing customer-managed keys to associate with the resource. This incl
 DESCRIPTION  
 }
 
-variable "diagnostic_settings" {
-  type = map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-DESCRIPTION  
-  nullable    = false
-
-  validation {
-    condition     = alltrue([for _, v in var.diagnostic_settings : contains(["Dedicated", "AzureDiagnostics"], v.log_analytics_destination_type)])
-    error_message = "Log analytics destination type must be one of: 'Dedicated', 'AzureDiagnostics'."
-  }
-  validation {
-    condition = alltrue(
-      [
-        for _, v in var.diagnostic_settings :
-        v.workspace_resource_id != null || v.storage_account_resource_id != null || v.event_hub_authorization_rule_resource_id != null || v.marketplace_partner_resource_id != null
-      ]
-    )
-    error_message = "At least one of `workspace_resource_id`, `storage_account_resource_id`, `marketplace_partner_resource_id`, or `event_hub_authorization_rule_resource_id`, must be set."
-  }
-}
-
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -163,100 +118,95 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
-variable "customLocationId" {
+variable "custom_location_id" {
   description = "The id of the Custom location that used to create hybrid aks"
   type        = string
 }
 
-variable "logicalNetworkId" {
+variable "logical_network_id" {
   description = "The id of the logical network that the AKS nodes will be connected to."
   type        = string
 }
 
-variable "controlPlaneIp" {
+variable "control_plane_ip" {
   type        = string
   description = "The ip address of the control plane"
 }
 
-variable "arbId" {
-  type        = string
-  description = "The id of the arc bridge resource, this is used to update hybrid aks extension"
-}
-
-variable "sshPublicKey" {
+variable "ssh_public_key" {
   type        = string
   description = "The SSH public key that will be used to access the kubernetes cluster nodes. If not specified, a new SSH key pair will be generated."
   default     = null
 }
 
-variable "sshKeyVaultId" {
+variable "ssh_key_vault_id" {
   type        = string
   description = "The id of the key vault that contains the SSH public and private keys."
   default     = null
 }
 
-variable "sshPublicKeySecretName" {
+variable "ssh_public_key_secret_name" {
   type        = string
   description = "The name of the secret in the key vault that contains the SSH public key."
   default     = "AksArcAgentSshPublicKey"
 }
 
-variable "sshPrivateKeyPemSecretName" {
+variable "ssh_private_key_pem_secret_name" {
   type        = string
   description = "The name of the secret in the key vault that contains the SSH private key PEM."
   default     = "AksArcAgentSshPrivateKeyPem"
 }
 
-// putting validation here is because the condition of a variable can only refer to the variable itself in terraform.
+# putting validation here is because the condition of a variable can only refer to the variable itself in terraform.
 locals {
   # tflint-ignore: terraform_unused_declarations
-  validateSshKeyVault = (var.sshPublicKey == null && var.sshKeyVaultId == null) ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
-  validateSshKey      = (var.sshPublicKey == null && var.sshPrivateKeyPemSecretName == "") ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
-  validateRbac        = (var.enableAzureRBAC == true && length(var.rbacAdminGroupObjectIds) == 0) ? tobool("At least one admin group object id must be specified") : true
+  validate_ssh_key_vault = (var.ssh_public_key == null && var.ssh_key_vault_id == null) ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
+  validate_ssh_key       = (var.ssh_public_key == null && var.ssh_private_key_pem_secret_name == "") ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
+  validate_rbac          = (var.enable_azure_rbac == true && length(var.rbac_admin_group_object_ids) == 0) ? tobool("At least one admin group object id must be specified") : true
 }
 
-variable "enableAzureRBAC" {
+variable "enable_azure_rbac" {
   type        = bool
   description = "Enable Azure RBAC for the kubernetes cluster"
   default     = true
 }
 
-variable "rbacAdminGroupObjectIds" {
+variable "rbac_admin_group_object_ids" {
   type        = list(string)
   description = "The object id of the admin group of the azure rbac"
   default     = []
 }
 
-variable "kubernetesVersion" {
+variable "kubernetes_version" {
   type        = string
   description = "The kubernetes version"
   default     = "1.28.5"
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetesVersion))
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
     error_message = "kubernetesVersion must be in the format of 'x.y.z'"
   }
 }
 
-variable "controlPlaneCount" {
+variable "control_plane_count" {
   type        = number
   description = "The count of the control plane"
   default     = 1
 }
 
-variable "controlPlaneVmSize" {
+variable "control_plane_vm_size" {
   type        = string
   description = "The size of the control plane VM"
   default     = "Standard_A4_v2"
 }
 
-variable "podCidr" {
+variable "pod_cidr" {
   type        = string
   description = "The CIDR range for the pods in the kubernetes cluster"
   default     = "10.244.0.0/16"
 }
 
-variable "agentPoolProfiles" {
+variable "agent_pool_profiles" {
   type = list(object({
     count             = number
     enableAutoScaling = optional(bool)
@@ -271,56 +221,57 @@ variable "agentPoolProfiles" {
   description = "The agent pool profiles"
 
   validation {
-    condition     = length(var.agentPoolProfiles) > 0
+    condition     = length(var.agent_pool_profiles) > 0
     error_message = "At least one agent pool profile must be specified"
   }
 
   validation {
     condition = length([
-      for profile in var.agentPoolProfiles : true
+      for profile in var.agent_pool_profiles : true
       if profile.enableAutoScaling == false || profile.enableAutoScaling == null
-    ]) == length(var.agentPoolProfiles)
+    ]) == length(var.agent_pool_profiles)
     error_message = "Agent pool profiles enableAutoScaling is not supported yet."
   }
 
   validation {
     condition = length([
-      for profile in var.agentPoolProfiles : true
+      for profile in var.agent_pool_profiles : true
       if profile.osType == null
       || contains(["Linux", "Windows"], profile.osType)
-    ]) == length(var.agentPoolProfiles)
+    ]) == length(var.agent_pool_profiles)
     error_message = "Agent pool profiles osType must be either 'Linux' or 'Windows'"
   }
 
   validation {
     condition = length([
-      for profile in var.agentPoolProfiles : true
+      for profile in var.agent_pool_profiles : true
       if profile.osSKU == null
       || contains(["CBLMariner", "Windows2019", "Windows2022"], profile.osSKU)
-    ]) == length(var.agentPoolProfiles)
+    ]) == length(var.agent_pool_profiles)
     error_message = "Agent pool profiles osSKU must be either 'CBLMariner', 'Windows2019' or 'Windows2022'"
   }
 
   validation {
     condition = length([
-      for profile in var.agentPoolProfiles : true
+      for profile in var.agent_pool_profiles : true
       if profile.osType == null || profile.osSKU == null
       || !contains(["Linux"], profile.osType) || contains(["CBLMariner"], profile.osSKU)
-    ]) == length(var.agentPoolProfiles)
+    ]) == length(var.agent_pool_profiles)
     error_message = "Agent pool profiles osSKU must be 'CBLMariner' if osType is 'Linux'"
   }
 
   validation {
     condition = length([
-      for profile in var.agentPoolProfiles : true
+      for profile in var.agent_pool_profiles : true
       if profile.osType == null || profile.osSKU == null
       || !contains(["Windows"], profile.osType) || contains(["Windows2019", "Windows2022"], profile.osSKU)
-    ]) == length(var.agentPoolProfiles)
+    ]) == length(var.agent_pool_profiles)
     error_message = "Agent pool profiles osSKU must be 'Windows2019' or 'Windows2022' if osType is 'Windows'"
   }
 }
 
-variable "isExported" {
-  type    = bool
-  default = false
+variable "is_exported" {
+  description = "Indicates whether the resource is exported"
+  type        = bool
+  default     = false
 }

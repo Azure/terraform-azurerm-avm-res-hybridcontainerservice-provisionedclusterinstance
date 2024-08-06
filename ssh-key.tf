@@ -1,26 +1,24 @@
-resource "tls_private_key" "rsaKey" {
-  count = var.sshPublicKey == null ? 1 : 0
+resource "tls_private_key" "rsa_key" {
+  count = var.ssh_public_key == null ? 1 : 0
 
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-resource "azurerm_key_vault_secret" "sshPublicKey" {
-  count = var.sshPublicKey == null ? 1 : 0
+resource "azurerm_key_vault_secret" "ssh_public_key" {
+  count = var.ssh_public_key == null ? 1 : 0
 
-  key_vault_id = var.sshKeyVaultId
-  name         = var.sshPublicKeySecretName
-  value        = tls_private_key.rsaKey[0].public_key_openssh
+  key_vault_id = var.ssh_key_vault_id
+  name         = var.ssh_public_key_secret_name
+  value        = tls_private_key.rsa_key[0].public_key_openssh
+  tags         = {}
 }
 
-resource "azurerm_key_vault_secret" "sshPrivateKeyPem" {
-  count = var.sshPublicKey == null ? 1 : 0
+resource "azurerm_key_vault_secret" "ssh_private_key_pem" {
+  count = var.ssh_public_key == null ? 1 : 0
 
-  key_vault_id = var.sshKeyVaultId
-  name         = var.sshPrivateKeyPemSecretName
-  value        = tls_private_key.rsaKey[0].private_key_pem
-}
-
-locals {
-  sshPublicKey = var.sshPublicKey == null ? tls_private_key.rsaKey[0].public_key_openssh : var.sshPublicKey
+  key_vault_id = var.ssh_key_vault_id
+  name         = var.ssh_private_key_pem_secret_name
+  value        = tls_private_key.rsa_key[0].private_key_pem
+  tags         = {}
 }

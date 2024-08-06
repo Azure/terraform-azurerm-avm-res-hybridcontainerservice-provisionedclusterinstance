@@ -9,7 +9,7 @@ resource "azurerm_management_lock" "this" {
 
   lock_level = var.lock.kind
   name       = coalesce(var.lock.name, "lock-${var.lock.kind}")
-  scope      = azapi_resource.provisionedClusterInstance.id # TODO: Replace with your azurerm resource name
+  scope      = azapi_resource.provisioned_cluster_instance.id # TODO: Replace with your azurerm resource name
   notes      = var.lock.kind == "CanNotDelete" ? "Cannot delete the resource or its child resources." : "Cannot delete or modify the resource or its child resources."
 }
 
@@ -17,7 +17,7 @@ resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
   principal_id                           = each.value.principal_id
-  scope                                  = azapi_resource.provisionedClusterInstance.id # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+  scope                                  = azapi_resource.provisioned_cluster_instance.id # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
   condition                              = each.value.condition
   condition_version                      = each.value.condition_version
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
@@ -28,17 +28,17 @@ resource "azurerm_role_assignment" "this" {
 
 data "azurerm_client_config" "current" {}
 
-resource "azapi_resource" "connectedCluster" {
+resource "azapi_resource" "connected_cluster" {
   type = "Microsoft.Kubernetes/connectedClusters@2024-01-01"
   body = {
     kind = "ProvisionedCluster"
     properties = {
       aadProfile = {
-        adminGroupObjectIDs = flatten(var.rbacAdminGroupObjectIds)
-        enableAzureRBAC     = var.enableAzureRBAC
+        adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
+        enable_azure_rbac   = var.enable_azure_rbac
         tenantID            = data.azurerm_client_config.current.tenant_id
       }
-      agentPublicKeyCertificate = "" //agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
+      agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
       azureHybridBenefit        = null
       privateLinkState          = null
       provisioningState         = null
@@ -46,7 +46,7 @@ resource "azapi_resource" "connectedCluster" {
       distribution              = null
     }
   }
-  location  = data.azurerm_resource_group.rg.location
+  location  = var.location
   name      = var.name
   parent_id = data.azurerm_resource_group.rg.id
 
@@ -55,9 +55,9 @@ resource "azapi_resource" "connectedCluster" {
   }
 
   depends_on = [
-    azurerm_key_vault_secret.sshPublicKey,
-    azurerm_key_vault_secret.sshPrivateKeyPem,
-    terraform_data.waitAksVhdReady,
+    azurerm_key_vault_secret.ssh_public_key,
+    azurerm_key_vault_secret.ssh_private_key_pem,
+    terraform_data.wait_aks_vhd_ready,
   ]
 
   lifecycle {
@@ -72,50 +72,44 @@ resource "azapi_resource" "connectedCluster" {
   }
 }
 
-locals {
-  agentPoolProfiles = [for pool in var.agentPoolProfiles : {
-    for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
-  }]
-}
-
-resource "azapi_resource" "provisionedClusterInstance" {
+resource "azapi_resource" "provisioned_cluster_instance" {
   type = "Microsoft.HybridContainerService/provisionedClusterInstances@2024-01-01"
   body = {
     extendedLocation = {
-      name = var.customLocationId
+      name = var.custom_location_id
       type = "CustomLocation"
     }
     properties = {
-      agentPoolProfiles = flatten(local.agentPoolProfiles)
+      agentPoolProfiles = flatten(local.agent_pool_profiles)
       cloudProviderProfile = {
         infraNetworkProfile = {
           vnetSubnetIds = [
-            var.logicalNetworkId,
+            var.logical_network_id,
           ]
         }
       }
       controlPlane = {
-        count  = var.controlPlaneCount
-        vmSize = var.controlPlaneVmSize
+        count  = var.control_plane_count
+        vmSize = var.control_plane_vm_size
         controlPlaneEndpoint = {
-          hostIP = var.controlPlaneIp
+          hostIP = var.control_plane_ip
         }
       }
-      kubernetesVersion = var.kubernetesVersion
+      kubernetesVersion = var.kubernetes_version
       linuxProfile = {
         ssh = {
           publicKeys = [
             {
-              keyData = local.sshPublicKey
+              keyData = local.ssh_public_key
             },
           ]
         }
       }
       networkProfile = {
-        podCidr       = var.podCidr
+        podCidr       = var.pod_cidr
         networkPolicy = "calico"
         loadBalancerProfile = {
-          // acctest0002 network only supports a LoadBalancer count of 0
+          # acctest0002 network only supports a LoadBalancer count of 0
         }
       }
       storageProfile = {
@@ -131,9 +125,9 @@ resource "azapi_resource" "provisionedClusterInstance" {
     }
   }
   name      = "default"
-  parent_id = azapi_resource.connectedCluster.id
+  parent_id = azapi_resource.connected_cluster.id
 
-  depends_on = [azapi_resource.connectedCluster]
+  depends_on = [azapi_resource.connected_cluster]
 
   lifecycle {
     ignore_changes = [

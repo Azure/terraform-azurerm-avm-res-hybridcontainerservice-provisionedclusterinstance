@@ -9,10 +9,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.74"
     }
-    modtm = {
-      source  = "azure/modtm"
-      version = "~> 0.3"
-    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
@@ -32,13 +28,6 @@ module "regions" {
   version = "~> 0.1"
 }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
@@ -52,24 +41,24 @@ data "azurerm_resource_group" "rg" {
 
 data "azapi_resource" "customlocation" {
   type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
-  name      = var.customLocationName
+  name      = var.custom_location_name
   parent_id = data.azurerm_resource_group.rg.id
 }
 
-data "azapi_resource" "logicalNetwork" {
+data "azapi_resource" "logical_network" {
   type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
-  name      = var.logicalNetworkName
+  name      = var.logical_network_name
   parent_id = data.azurerm_resource_group.rg.id
 }
 
-data "azurerm_key_vault" "DeploymentKeyVault" {
-  name                = var.keyvaultName
+data "azurerm_key_vault" "deployment_key_vault" {
+  name                = var.keyvault_name
   resource_group_name = var.resource_group_name
 }
 
 data "azapi_resource" "arcbridge" {
   type      = "Microsoft.ResourceConnector/appliances@2022-10-27"
-  name      = "${var.clusterName}-arcbridge"
+  name      = "${var.cluster_name}-arcbridge"
   parent_id = data.azurerm_resource_group.rg.id
 }
 
@@ -83,18 +72,17 @@ module "test" {
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
   location            = data.azurerm_resource_group.rg.location
-  name                = var.aksArcName
+  name                = var.aks_arc_name
   resource_group_name = data.azurerm_resource_group.rg.name
 
   enable_telemetry = var.enable_telemetry # see variables.tf
 
-  customLocationId        = data.azapi_resource.customlocation.id
-  logicalNetworkId        = data.azapi_resource.logicalNetwork.id
-  agentPoolProfiles       = var.agentPoolProfiles
-  sshKeyVaultId           = data.azurerm_key_vault.DeploymentKeyVault.id
-  controlPlaneIp          = "192.168.1.190"
-  arbId                   = data.azapi_resource.arcbridge.id
-  kubernetesVersion       = "1.28.5"
-  controlPlaneCount       = 1
-  rbacAdminGroupObjectIds = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
+  custom_location_id          = data.azapi_resource.customlocation.id
+  logical_network_id          = data.azapi_resource.logical_network.id
+  agent_pool_profiles         = var.agent_pool_profiles
+  ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
+  control_plane_ip            = "192.168.1.190"
+  kubernetes_version          = "1.28.5"
+  control_plane_count         = 1
+  rbac_admin_group_object_ids = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
 }
