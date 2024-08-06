@@ -6,14 +6,7 @@ variable "location" {
 
 variable "name" {
   type        = string
-  description = "The name of the this resource."
-
-  validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
-  }
+  description = "The name of the hybrid aks"
 }
 
 # This is required for most resource modules
@@ -136,70 +129,6 @@ DESCRIPTION
   nullable    = false
 }
 
-variable "private_endpoints" {
-  type = map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
-    }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-DESCRIPTION
-  nullable    = false
-}
-
-# This variable is used to determine if the private_dns_zone_group block should be included,
-# or if it is to be managed externally, e.g. using Azure Policy.
-# https://github.com/Azure/terraform-azurerm-avm-res-keyvault-vault/issues/32
-# Alternatively you can use AzAPI, which does not have this issue.
-variable "private_endpoints_manage_dns_zone_group" {
-  type        = bool
-  default     = true
-  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
-  nullable    = false
-}
-
 variable "role_assignments" {
   type = map(object({
     role_definition_id_or_name             = string
@@ -209,6 +138,7 @@ variable "role_assignments" {
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -231,4 +161,166 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "customLocationId" {
+  description = "The id of the Custom location that used to create hybrid aks"
+  type        = string
+}
+
+variable "logicalNetworkId" {
+  description = "The id of the logical network that the AKS nodes will be connected to."
+  type        = string
+}
+
+variable "controlPlaneIp" {
+  type        = string
+  description = "The ip address of the control plane"
+}
+
+variable "arbId" {
+  type        = string
+  description = "The id of the arc bridge resource, this is used to update hybrid aks extension"
+}
+
+variable "sshPublicKey" {
+  type        = string
+  description = "The SSH public key that will be used to access the kubernetes cluster nodes. If not specified, a new SSH key pair will be generated."
+  default     = null
+}
+
+variable "sshKeyVaultId" {
+  type        = string
+  description = "The id of the key vault that contains the SSH public and private keys."
+  default     = null
+}
+
+variable "sshPublicKeySecretName" {
+  type        = string
+  description = "The name of the secret in the key vault that contains the SSH public key."
+  default     = "AksArcAgentSshPublicKey"
+}
+
+variable "sshPrivateKeyPemSecretName" {
+  type        = string
+  description = "The name of the secret in the key vault that contains the SSH private key PEM."
+  default     = "AksArcAgentSshPrivateKeyPem"
+}
+
+// putting validation here is because the condition of a variable can only refer to the variable itself in terraform.
+locals {
+  # tflint-ignore: terraform_unused_declarations
+  validateSshKeyVault = (var.sshPublicKey == null && var.sshKeyVaultId == null) ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
+  validateSshKey      = (var.sshPublicKey == null && var.sshPrivateKeyPemSecretName == "") ? tobool("sshPrivateKeyPemSecretName must be specified if sshPublicKey is not specified") : true
+  validateRbac        = (var.enableAzureRBAC == true && length(var.rbacAdminGroupObjectIds) == 0) ? tobool("At least one admin group object id must be specified") : true
+}
+
+variable "enableAzureRBAC" {
+  type        = bool
+  description = "Enable Azure RBAC for the kubernetes cluster"
+  default     = true
+}
+
+variable "rbacAdminGroupObjectIds" {
+  type        = list(string)
+  description = "The object id of the admin group of the azure rbac"
+  default     = []
+}
+
+variable "kubernetesVersion" {
+  type        = string
+  description = "The kubernetes version"
+  default     = "1.28.5"
+
+  validation {
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetesVersion))
+    error_message = "kubernetesVersion must be in the format of 'x.y.z'"
+  }
+}
+
+variable "controlPlaneCount" {
+  type        = number
+  description = "The count of the control plane"
+  default     = 1
+}
+
+variable "controlPlaneVmSize" {
+  type        = string
+  description = "The size of the control plane VM"
+  default     = "Standard_A4_v2"
+}
+
+variable "podCidr" {
+  type        = string
+  description = "The CIDR range for the pods in the kubernetes cluster"
+  default     = "10.244.0.0/16"
+}
+
+variable "agentPoolProfiles" {
+  type = list(object({
+    count             = number
+    enableAutoScaling = optional(bool)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    name              = optional(string)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string, "Standard_A4_v2")
+  }))
+  description = "The agent pool profiles"
+
+  validation {
+    condition     = length(var.agentPoolProfiles) > 0
+    error_message = "At least one agent pool profile must be specified"
+  }
+
+  validation {
+    condition = length([
+      for profile in var.agentPoolProfiles : true
+      if profile.enableAutoScaling == false || profile.enableAutoScaling == null
+    ]) == length(var.agentPoolProfiles)
+    error_message = "Agent pool profiles enableAutoScaling is not supported yet."
+  }
+
+  validation {
+    condition = length([
+      for profile in var.agentPoolProfiles : true
+      if profile.osType == null
+      || contains(["Linux", "Windows"], profile.osType)
+    ]) == length(var.agentPoolProfiles)
+    error_message = "Agent pool profiles osType must be either 'Linux' or 'Windows'"
+  }
+
+  validation {
+    condition = length([
+      for profile in var.agentPoolProfiles : true
+      if profile.osSKU == null
+      || contains(["CBLMariner", "Windows2019", "Windows2022"], profile.osSKU)
+    ]) == length(var.agentPoolProfiles)
+    error_message = "Agent pool profiles osSKU must be either 'CBLMariner', 'Windows2019' or 'Windows2022'"
+  }
+
+  validation {
+    condition = length([
+      for profile in var.agentPoolProfiles : true
+      if profile.osType == null || profile.osSKU == null
+      || !contains(["Linux"], profile.osType) || contains(["CBLMariner"], profile.osSKU)
+    ]) == length(var.agentPoolProfiles)
+    error_message = "Agent pool profiles osSKU must be 'CBLMariner' if osType is 'Linux'"
+  }
+
+  validation {
+    condition = length([
+      for profile in var.agentPoolProfiles : true
+      if profile.osType == null || profile.osSKU == null
+      || !contains(["Windows"], profile.osType) || contains(["Windows2019", "Windows2022"], profile.osSKU)
+    ]) == length(var.agentPoolProfiles)
+    error_message = "Agent pool profiles osSKU must be 'Windows2019' or 'Windows2022' if osType is 'Windows'"
+  }
+}
+
+variable "isExported" {
+  type    = bool
+  default = false
 }

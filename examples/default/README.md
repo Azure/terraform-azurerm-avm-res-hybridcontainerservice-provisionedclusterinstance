@@ -7,6 +7,10 @@ This deploys the module in its simplest form.
 terraform {
   required_version = "~> 1.5"
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.13"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.74"
@@ -30,8 +34,8 @@ provider "azurerm" {
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = "~> 0.3"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.1"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -48,10 +52,33 @@ module "naming" {
 }
 
 # This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+data "azurerm_resource_group" "rg" {
+  name = var.resource_group_name
 }
+
+data "azapi_resource" "customlocation" {
+  type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
+  name      = var.customLocationName
+  parent_id = data.azurerm_resource_group.rg.id
+}
+
+data "azapi_resource" "logicalNetwork" {
+  type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
+  name      = var.logicalNetworkName
+  parent_id = data.azurerm_resource_group.rg.id
+}
+
+data "azurerm_key_vault" "DeploymentKeyVault" {
+  name                = var.keyvaultName
+  resource_group_name = var.resource_group_name
+}
+
+data "azapi_resource" "arcbridge" {
+  type      = "Microsoft.ResourceConnector/appliances@2022-10-27"
+  name      = "${var.clusterName}-arcbridge"
+  parent_id = data.azurerm_resource_group.rg.id
+}
+
 
 # This is the module call
 # Do not specify location here due to the randomization above.
@@ -61,11 +88,21 @@ module "test" {
   source = "../../"
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+  location            = data.azurerm_resource_group.rg.location
+  name                = var.aksArcName
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   enable_telemetry = var.enable_telemetry # see variables.tf
+
+  customLocationId        = data.azapi_resource.customlocation.id
+  logicalNetworkId        = data.azapi_resource.logicalNetwork.id
+  agentPoolProfiles       = var.agentPoolProfiles
+  sshKeyVaultId           = data.azurerm_key_vault.DeploymentKeyVault.id
+  controlPlaneIp          = "192.168.1.190"
+  arbId                   = data.azapi_resource.arcbridge.id
+  kubernetesVersion       = "1.28.5"
+  controlPlaneCount       = 1
+  rbacAdminGroupObjectIds = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
 }
 ```
 
@@ -76,35 +113,100 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 1.13)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.74)
-
-- <a name="provider_random"></a> [random](#provider\_random) (~> 3.5)
-
 ## Resources
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [azapi_resource.arcbridge](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource.customlocation](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource.logicalNetwork](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azurerm_key_vault.DeploymentKeyVault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) (data source)
+- [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-No required inputs.
+The following input variables are required:
+
+### <a name="input_aksArcName"></a> [aksArcName](#input\_aksArcName)
+
+Description: The name of the hybrid aks
+
+Type: `string`
+
+### <a name="input_clusterName"></a> [clusterName](#input\_clusterName)
+
+Description: The name of the HCI cluster. Must be the same as the name when preparing AD.
+
+Type: `string`
+
+### <a name="input_customLocationName"></a> [customLocationName](#input\_customLocationName)
+
+Description: The name of the custom location.
+
+Type: `string`
+
+### <a name="input_keyvaultName"></a> [keyvaultName](#input\_keyvaultName)
+
+Description: The name of the key vault.
+
+Type: `string`
+
+### <a name="input_logicalNetworkName"></a> [logicalNetworkName](#input\_logicalNetworkName)
+
+Description: The name of the logical network
+
+Type: `string`
+
+### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+
+Description: The resource group where the resources will be deployed.
+
+Type: `string`
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_agentPoolProfiles"></a> [agentPoolProfiles](#input\_agentPoolProfiles)
+
+Description: The agent pool profiles for the Kubernetes cluster.
+
+Type:
+
+```hcl
+list(object({
+    count             = number
+    enableAutoScaling = optional(bool, false)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    name              = optional(string)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+  }))
+```
+
+Default:
+
+```json
+[
+  {
+    "count": 1,
+    "enableAutoScaling": false
+  }
+]
+```
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -132,9 +234,9 @@ Version: ~> 0.3
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
-Source: Azure/regions/azurerm
+Source: Azure/avm-utl-regions/azurerm
 
-Version: ~> 0.3
+Version: ~> 0.1
 
 ### <a name="module_test"></a> [test](#module\_test)
 
