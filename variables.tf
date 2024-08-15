@@ -203,6 +203,7 @@ variable "rbac_admin_group_object_ids" {
   type        = list(string)
   default     = []
   description = "The object id of the admin group of the azure rbac"
+  nullable    = false
 }
 
 variable "role_assignments" {
