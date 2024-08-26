@@ -1,23 +1,23 @@
 terraform {
   required_version = "~> 1.5"
   required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.13"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.74"
-    }
-    modtm = {
-      source  = "azure/modtm"
-      version = "~> 0.3"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
     }
   }
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 
@@ -28,13 +28,6 @@ module "regions" {
   version = "~> 0.1"
 }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
@@ -42,9 +35,25 @@ module "naming" {
 }
 
 # This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+data "azurerm_resource_group" "rg" {
+  name = var.resource_group_name
+}
+
+data "azapi_resource" "customlocation" {
+  type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
+  name      = var.custom_location_name
+  parent_id = data.azurerm_resource_group.rg.id
+}
+
+data "azapi_resource" "logical_network" {
+  type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
+  name      = var.logical_network_name
+  parent_id = data.azurerm_resource_group.rg.id
+}
+
+data "azurerm_key_vault" "deployment_key_vault" {
+  name                = var.keyvault_name
+  resource_group_name = var.resource_group_name
 }
 
 # This is the module call
@@ -55,9 +64,18 @@ module "test" {
   source = "../../"
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+  location            = data.azurerm_resource_group.rg.location
+  name                = var.aks_arc_name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   enable_telemetry = var.enable_telemetry # see variables.tf
+
+  custom_location_id          = data.azapi_resource.customlocation.id
+  logical_network_id          = data.azapi_resource.logical_network.id
+  agent_pool_profiles         = var.agent_pool_profiles
+  ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
+  control_plane_ip            = "192.168.1.190"
+  kubernetes_version          = "1.28.5"
+  control_plane_count         = 1
+  rbac_admin_group_object_ids = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
 }
