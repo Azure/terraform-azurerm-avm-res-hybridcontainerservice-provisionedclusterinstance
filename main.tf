@@ -33,6 +33,9 @@ resource "azapi_resource" "connected_cluster" {
   body = {
     kind = "ProvisionedCluster"
     properties = {
+      arcAgentProfile = {
+        agentAutoUpgrade = "Enabled"
+      }
       aadProfile = {
         adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
         enableAzureRBAC     = var.enable_azure_rbac
