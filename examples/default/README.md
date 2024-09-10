@@ -26,20 +26,6 @@ provider "azurerm" {
   }
 }
 
-
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "~> 0.1"
-}
-
-# This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "~> 0.3"
-}
-
 # This is required for resource modules
 data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
@@ -67,9 +53,10 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
 module "test" {
-  source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
+  # source = "../../"
+  source  = "Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm"
+  version = "~> 0.1.0"
+
   location            = data.azurerm_resource_group.rg.location
   name                = var.aks_arc_name
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -195,23 +182,11 @@ No outputs.
 
 The following Modules are called:
 
-### <a name="module_naming"></a> [naming](#module\_naming)
-
-Source: Azure/naming/azurerm
-
-Version: ~> 0.3
-
-### <a name="module_regions"></a> [regions](#module\_regions)
-
-Source: Azure/avm-utl-regions/azurerm
-
-Version: ~> 0.1
-
 ### <a name="module_test"></a> [test](#module\_test)
 
-Source: ../../
+Source: Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm
 
-Version:
+Version: ~> 0.1.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
