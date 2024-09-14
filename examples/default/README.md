@@ -53,9 +53,9 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
 module "test" {
-  # source = "../../"
-  source  = "Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm"
-  version = "~> 0.1.0"
+  source = "../../"
+  # source  = "Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm"
+  # version = "~> 0.1"
 
   location            = data.azurerm_resource_group.rg.location
   name                = var.aks_arc_name
@@ -213,9 +213,9 @@ The following Modules are called:
 
 ### <a name="module_test"></a> [test](#module\_test)
 
-Source: Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm
+Source: ../../
 
-Version: ~> 0.1.0
+Version:
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
