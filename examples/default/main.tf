@@ -61,8 +61,7 @@ module "test" {
   logical_network_id          = data.azapi_resource.logical_network.id
   agent_pool_profiles         = var.agent_pool_profiles
   ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
-  control_plane_ip            = "192.168.1.190"
-  kubernetes_version          = "1.28.5"
-  control_plane_count         = 1
-  rbac_admin_group_object_ids = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
+  control_plane_ip            = var.control_plane_ip
+  control_plane_count         = var.control_plane_count
+  rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
 }

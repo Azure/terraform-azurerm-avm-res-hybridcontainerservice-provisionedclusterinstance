@@ -67,10 +67,9 @@ module "test" {
   logical_network_id          = data.azapi_resource.logical_network.id
   agent_pool_profiles         = var.agent_pool_profiles
   ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
-  control_plane_ip            = "192.168.1.190"
-  kubernetes_version          = "1.28.5"
-  control_plane_count         = 1
-  rbac_admin_group_object_ids = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
+  control_plane_ip            = var.control_plane_ip
+  control_plane_count         = var.control_plane_count
+  rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
 }
 ```
 
@@ -164,6 +163,22 @@ Default:
 ]
 ```
 
+### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
+
+Description: The count of the control plane
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_control_plane_ip"></a> [control\_plane\_ip](#input\_control\_plane\_ip)
+
+Description: The IP address of the control plane
+
+Type: `string`
+
+Default: `"192.168.1.190"`
+
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
 Description: This variable controls whether or not telemetry is enabled for the module.  
@@ -173,6 +188,20 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_rbac_admin_group_object_ids"></a> [rbac\_admin\_group\_object\_ids](#input\_rbac\_admin\_group\_object\_ids)
+
+Description: The object IDs of the Azure AD groups that will be granted admin access to the Kubernetes cluster.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "ed888f99-66c1-48fe-992f-030f49ba50ed"
+]
+```
 
 ## Outputs
 

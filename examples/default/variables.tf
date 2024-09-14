@@ -42,6 +42,18 @@ variable "agent_pool_profiles" {
   description = "The agent pool profiles for the Kubernetes cluster."
 }
 
+variable "control_plane_count" {
+  type        = number
+  default     = 1
+  description = "The count of the control plane"
+}
+
+variable "control_plane_ip" {
+  type        = string
+  default     = "192.168.1.190"
+  description = "The IP address of the control plane"
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -50,4 +62,10 @@ This variable controls whether or not telemetry is enabled for the module.
 For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
+}
+
+variable "rbac_admin_group_object_ids" {
+  type        = list(string)
+  default     = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
+  description = "The object IDs of the Azure AD groups that will be granted admin access to the Kubernetes cluster."
 }
