@@ -16,7 +16,10 @@ while ($true) {
         az login --federated-token $token --tenant $env:ARM_TENANT_ID -u $env:ARM_CLIENT_ID --service-principal
         az account set --subscription $env:ARM_SUBSCRIPTION_ID
     }
-    
+    # delete the default version to avoid unsynchronized state between ARM and on-preimse
+    $url = "https://management.azure.com${cl_id}/providers/Microsoft.HybridContainerService/kubernetesVersions/default?api-version=2024-01-01"
+    az rest --headers "Authorization=Bearer $token" "Content-Type=application/json;charset=utf-8" --uri $url --method DELETE
+    Start-Sleep -Seconds 5 
     $state = az aksarc get-versions --custom-location $customLocationResourceId -o json --only-show-errors
     $state = "$state".Replace("`n", "").Replace("`r", "").Replace("`t", "").Replace(" ", "")
     echo $state
