@@ -15,8 +15,8 @@ while ($true) {
     
         az login --federated-token $token --tenant $env:ARM_TENANT_ID -u $env:ARM_CLIENT_ID --service-principal
         az account set --subscription $env:ARM_SUBSCRIPTION_ID
-        # delete the default version to avoid unsynchronized state between ARM and on-prem
     }
+    # delete the default version to avoid unsynchronized state between ARM and on-prem
     $token = $(az account get-access-token --query accessToken)
     $url = "https://management.azure.com${customLocationResourceId}/providers/Microsoft.HybridContainerService/kubernetesVersions/default?api-version=2024-01-01"
     echo "Deleting default version to keep sync: $url"
