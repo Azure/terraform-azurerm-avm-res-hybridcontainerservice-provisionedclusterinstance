@@ -89,6 +89,12 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
+variable "azure_hybrid_benefit" {
+  type        = string
+  default     = "False"
+  description = "The Azure Hybrid Benefit for the kubernetes cluster."
+}
+
 variable "control_plane_count" {
   type        = number
   default     = 1
@@ -193,6 +199,12 @@ DESCRIPTION
   nullable    = false
 }
 
+variable "nfs_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the NFS CSI driver for the kubernetes cluster."
+}
+
 variable "pod_cidr" {
   type        = string
   default     = "10.244.0.0/16"
@@ -231,6 +243,12 @@ A map of role assignments to create on this resource. The map key is deliberatel
 > Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
 DESCRIPTION
   nullable    = false
+}
+
+variable "smb_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SMB CSI driver for the kubernetes cluster."
 }
 
 variable "ssh_key_vault_id" {

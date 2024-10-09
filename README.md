@@ -105,6 +105,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_azure_hybrid_benefit"></a> [azure\_hybrid\_benefit](#input\_azure\_hybrid\_benefit)
+
+Description: The Azure Hybrid Benefit for the kubernetes cluster.
+
+Type: `string`
+
+Default: `"False"`
+
 ### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
 
 Description: The count of the control plane
@@ -215,6 +223,14 @@ object({
 
 Default: `{}`
 
+### <a name="input_nfs_csi_driver_enabled"></a> [nfs\_csi\_driver\_enabled](#input\_nfs\_csi\_driver\_enabled)
+
+Description: Enable the NFS CSI driver for the kubernetes cluster.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr)
 
 Description: The CIDR range for the pods in the kubernetes cluster
@@ -260,6 +276,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_smb_csi_driver_enabled"></a> [smb\_csi\_driver\_enabled](#input\_smb\_csi\_driver\_enabled)
+
+Description: Enable the SMB CSI driver for the kubernetes cluster.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_ssh_key_vault_id"></a> [ssh\_key\_vault\_id](#input\_ssh\_key\_vault\_id)
 
