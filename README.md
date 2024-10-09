@@ -229,7 +229,7 @@ Description: Enable the NFS CSI driver for the kubernetes cluster.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr)
 
@@ -283,7 +283,7 @@ Description: Enable the SMB CSI driver for the kubernetes cluster.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_ssh_key_vault_id"></a> [ssh\_key\_vault\_id](#input\_ssh\_key\_vault\_id)
 

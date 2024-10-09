@@ -201,7 +201,7 @@ DESCRIPTION
 
 variable "nfs_csi_driver_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable the NFS CSI driver for the kubernetes cluster."
 }
 
@@ -247,7 +247,7 @@ DESCRIPTION
 
 variable "smb_csi_driver_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable the SMB CSI driver for the kubernetes cluster."
 }
 
