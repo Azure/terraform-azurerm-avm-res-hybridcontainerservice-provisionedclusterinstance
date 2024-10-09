@@ -113,18 +113,19 @@ resource "azapi_resource" "provisioned_cluster_instance" {
         networkPolicy = "calico"
         loadBalancerProfile = {
           # acctest0002 network only supports a LoadBalancer count of 0
+          count = 0
         }
       }
       storageProfile = {
         smbCsiDriver = {
-          enabled = true
+          enabled = var.smb_csi_driver_enabled
         }
         nfsCsiDriver = {
-          enabled = true
+          enabled = var.nfs_csi_driver_enabled
         }
       }
       clusterVMAccessProfile = {}
-      licenseProfile         = { azureHybridBenefit = "False" }
+      licenseProfile         = { azureHybridBenefit = var.azure_hybrid_benefit }
     }
   }
   name      = "default"
