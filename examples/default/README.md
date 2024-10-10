@@ -57,9 +57,9 @@ module "test" {
   # source  = "Azure/avm-res-hybridcontainerservice-provisionedclusterinstance/azurerm"
   # version = "~> 0.1"
 
-  location            = data.azurerm_resource_group.rg.location
-  name                = var.aks_arc_name
-  resource_group_name = data.azurerm_resource_group.rg.name
+  location          = data.azurerm_resource_group.rg.location
+  name              = var.aks_arc_name
+  resource_group_id = data.azurerm_resource_group.rg.id
 
   enable_telemetry = var.enable_telemetry # see variables.tf
 

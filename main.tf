@@ -1,8 +1,3 @@
-# TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
-data "azurerm_resource_group" "rg" {
-  name = var.resource_group_name
-}
-
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
   count = var.lock != null ? 1 : 0
@@ -51,7 +46,7 @@ resource "azapi_resource" "connected_cluster" {
   }
   location  = var.location
   name      = var.name
-  parent_id = data.azurerm_resource_group.rg.id
+  parent_id = var.resource_group_id
 
   identity {
     type = "SystemAssigned"

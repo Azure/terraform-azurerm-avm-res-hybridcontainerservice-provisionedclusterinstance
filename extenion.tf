@@ -1,6 +1,6 @@
 resource "terraform_data" "replacement" {
   count = var.is_exported ? 0 : 1
-  input = data.azurerm_resource_group.rg.name
+  input = local.resource_group_name
 }
 
 # This is a known issue for arc aks, it need to wait for the kubernate vhd ready to deploy aks
