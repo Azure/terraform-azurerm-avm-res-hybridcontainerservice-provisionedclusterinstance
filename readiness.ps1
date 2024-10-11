@@ -28,6 +28,7 @@ while ($true) {
         }
         sleep 5
     }
+    sleep 60 # wait a bit for syncing
     echo "Getting versions"
     $state = az aksarc get-versions --custom-location $customLocationResourceId -o json --only-show-errors
     $state = "$state".Replace("`n", "").Replace("`r", "").Replace("`t", "").Replace(" ", "")
