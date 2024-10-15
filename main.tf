@@ -43,6 +43,7 @@ resource "azapi_resource" "connected_cluster" {
   location  = var.location
   name      = var.name
   parent_id = var.resource_group_id
+  tags      = var.tags
 
   identity {
     type = "SystemAssigned"
