@@ -31,7 +31,7 @@ resource "azapi_resource" "connected_cluster" {
       arcAgentProfile = {
         agentAutoUpgrade = "Enabled"
       }
-      aadProfile                = local.aad_profile_filtered
+      aadProfile                = local.aad_profile_omit_null
       agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
       azureHybridBenefit        = null
       privateLinkState          = null
