@@ -31,11 +31,11 @@ resource "azapi_resource" "connected_cluster" {
       arcAgentProfile = {
         agentAutoUpgrade = "Enabled"
       }
-      aadProfile = var.enable_azure_rbac != null ? {
+      aadProfile = var.enable_azure_rbac != null ? merge({
         adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
         enableAzureRBAC     = var.enable_azure_rbac
         tenantID            = data.azurerm_client_config.current.tenant_id
-      } : {}
+      }) : {}
       agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
       azureHybridBenefit        = null
       privateLinkState          = null
