@@ -275,7 +275,6 @@ variable "ssh_public_key_secret_name" {
   description = "The name of the secret in the key vault that contains the SSH public key."
 }
 
-# tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(string)
   default     = null
