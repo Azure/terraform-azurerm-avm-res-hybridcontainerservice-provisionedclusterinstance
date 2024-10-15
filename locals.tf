@@ -1,4 +1,14 @@
 locals {
+  aad_profile_full = var.enable_azure_rbac != null ? {
+    adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
+    enableAzureRBAC     = var.enable_azure_rbac
+    tenantID            = data.azurerm_client_config.current.tenant_id
+    } : {
+    adminGroupObjectIDs = null
+    enableAzureRBAC     = null
+    tenantID            = null
+  }
+  aad_profile_omit_null = { for k, v in local.aad_profile_full : k => v if v != null }
   agent_pool_profiles = [for pool in var.agent_pool_profiles : {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
