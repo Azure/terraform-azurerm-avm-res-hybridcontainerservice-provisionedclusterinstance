@@ -280,3 +280,9 @@ variable "tags" {
   default     = null
   description = "(Optional) Tags of the resource."
 }
+
+variable "tenant_id" {
+  type        = string
+  default     = ""
+  description = "(Optional) Value of the tenant id"
+}

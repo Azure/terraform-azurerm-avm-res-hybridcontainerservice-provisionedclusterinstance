@@ -324,6 +324,14 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_tenant_id"></a> [tenant\_id](#input\_tenant\_id)
+
+Description: (Optional) Value of the tenant id
+
+Type: `string`
+
+Default: `""`
+
 ## Outputs
 
 The following outputs are exported:

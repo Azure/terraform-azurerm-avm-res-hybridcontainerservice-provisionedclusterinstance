@@ -21,7 +21,9 @@ resource "azurerm_role_assignment" "this" {
   skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
 }
 
-data "azurerm_client_config" "current" {}
+data "azurerm_client_config" "current" {
+  count = var.tenant_id == "" ? 1 : 0
+}
 
 resource "azapi_resource" "connected_cluster" {
   type = "Microsoft.Kubernetes/connectedClusters@2024-01-01"
