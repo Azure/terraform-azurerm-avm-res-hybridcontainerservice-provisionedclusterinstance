@@ -2,7 +2,7 @@ locals {
   aad_profile_full = var.enable_azure_rbac != null ? {
     adminGroupObjectIDs = flatten(var.rbac_admin_group_object_ids)
     enableAzureRBAC     = var.enable_azure_rbac
-    tenantID            = var.tenant_id == "" ? data.azurerm_client_config.current.tenant_id : var.tenant_id
+    tenantID            = var.tenant_id == "" ? data.azurerm_client_config.current[0].tenant_id : var.tenant_id
     } : {
     adminGroupObjectIDs = null
     enableAzureRBAC     = null
