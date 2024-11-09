@@ -49,9 +49,20 @@ while ($true) {
     # Default to the latest version
     if ($kubernetesVersion -eq "[PLACEHOLDER]")
     {
-        $versions = ($state | ConvertFrom-Json).Properties.values.version
-        $sortedVersions = $versions | Sort-Object { [version]$_ } -Descending
-        $kubernetesVersion = $sortedVersions[0]
+        $json = $state | ConvertFrom-Json
+        $latestPatchVersion = $json.properties.values |
+        ForEach-Object {
+            $_.patchVersions.PSObject.Properties |
+                ForEach-Object {
+                [PSCustomObject]@{
+                    Version = [version]$_.Name
+                    Patch   = $_.Name
+                }
+            }
+        }  |   Sort-Object Version -Descending | Select-Object -First 1
+
+        Write-Verbose "Using kubernetes version = $($latestPatchVersion.Patch)" -Verbose
+        $kubernetesVersion = $latestPatchVersion.Patch
     }
 
     foreach ($version in (echo $state  | ConvertFrom-Json).properties.values) {
