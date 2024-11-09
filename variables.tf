@@ -288,3 +288,15 @@ variable "tenant_id" {
   default     = ""
   description = "(Optional) Value of the tenant id"
 }
+
+variable "enable_workload_identity" {
+  type = bool
+  default = false
+  description = "(Optional) Enable Workload Identity"
+}
+
+variable "enable_oidc_issuer" {
+  type = bool
+  default = false
+  description = "(Optional) Enable OIDC Issuer"
+}

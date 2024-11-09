@@ -40,6 +40,14 @@ resource "azapi_resource" "connected_cluster" {
       provisioningState         = null
       infrastructure            = null
       distribution              = null
+      securityProfile = {
+        workloadIdentity = {
+          enabled = var.enable_workload_identity
+        }
+        oidcIssuerProfile = {
+          enabled = var.enable_oidc_issuer
+        }
+      }
     }
   }
   location  = var.location
