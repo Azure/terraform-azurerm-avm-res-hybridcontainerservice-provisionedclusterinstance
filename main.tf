@@ -44,9 +44,9 @@ resource "azapi_resource" "connected_cluster" {
         workloadIdentity = {
           enabled = var.enable_workload_identity
         }
-        oidcIssuerProfile = {
-          enabled = var.enable_oidc_issuer
-        }
+      }
+      oidcIssuerProfile = {
+        enabled = var.enable_oidc_issuer
       }
     }
   }
