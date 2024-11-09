@@ -7,7 +7,7 @@ resource "terraform_data" "replacement" {
 resource "terraform_data" "wait_aks_vhd_ready" {
   count = var.is_exported ? 0 : 1
   provisioner "local-exec" {
-    command     = "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ${path.module}/readiness.ps1 -customLocationResourceId ${var.custom_location_id} -kubernetesVersion ${var.kubernetes_version} -osSku ${local.os_sku}"
+    command     = "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ${path.module}/readiness.ps1 -customLocationResourceId ${var.custom_location_id} -kubernetesVersion ${local.kubernetesVersion} -osSku ${local.os_sku}"
     interpreter = ["PowerShell", "-Command"]
   }
 

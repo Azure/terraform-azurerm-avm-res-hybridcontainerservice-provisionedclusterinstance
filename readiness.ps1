@@ -1,6 +1,6 @@
 param (
     [string] $customLocationResourceId,
-    [string] $kubernetesVersion,
+    [string] $kubernetesVersion = "",
     [string] $osSku
 )
 
@@ -45,6 +45,14 @@ while ($true) {
         $state = "{$state"
     }
     $ready = $false
+
+    # Default to the latest version
+    if ($kubernetesVersion -eq "[PLACEHOLDER]")
+    {
+        $versions = ($state | ConvertFrom-Json).Properties.values.version
+        $sortedVersions = $versions | Sort-Object { [version]$_ } -Descending
+        $kubernetesVersion = $sortedVersions[0]
+    }
 
     foreach ($version in (echo $state  | ConvertFrom-Json).properties.values) {
         if (!$kubernetesVersion.StartsWith($version.version)) {

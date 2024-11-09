@@ -19,4 +19,5 @@ locals {
   resource_group_parts               = split("/", var.resource_group_id)
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
   ssh_public_key                     = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
+  kubernetesVersion = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
 }

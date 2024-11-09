@@ -157,11 +157,11 @@ variable "is_exported" {
 
 variable "kubernetes_version" {
   type        = string
-  default     = "1.28.5"
+  default     = ""
   description = "The kubernetes version"
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
+    condition     = var.kubernetes_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
     error_message = "kubernetesVersion must be in the format of 'x.y.z'"
   }
 }
