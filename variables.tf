@@ -60,6 +60,8 @@ variable "agent_pool_profiles" {
 variable "control_plane_ip" {
   type        = string
   description = "The ip address of the control plane"
+  default = null
+  nullable = true
 }
 
 variable "custom_location_id" {
