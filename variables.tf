@@ -57,13 +57,6 @@ variable "agent_pool_profiles" {
   }
 }
 
-variable "control_plane_ip" {
-  type        = string
-  description = "The ip address of the control plane"
-  default = null
-  nullable = true
-}
-
 variable "custom_location_id" {
   type        = string
   description = "The id of the Custom location that used to create hybrid aks"
@@ -103,6 +96,12 @@ variable "control_plane_count" {
   description = "The count of the control plane"
 }
 
+variable "control_plane_ip" {
+  type        = string
+  default     = null
+  description = "The ip address of the control plane"
+}
+
 variable "control_plane_vm_size" {
   type        = string
   default     = "Standard_A4_v2"
@@ -138,6 +137,12 @@ variable "enable_azure_rbac" {
   description = "Enable Azure RBAC for the kubernetes cluster"
 }
 
+variable "enable_oidc_issuer" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enable OIDC Issuer"
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -147,6 +152,12 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
   nullable    = false
+}
+
+variable "enable_workload_identity" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enable Workload Identity"
 }
 
 variable "is_exported" {
@@ -287,16 +298,4 @@ variable "tenant_id" {
   type        = string
   default     = ""
   description = "(Optional) Value of the tenant id"
-}
-
-variable "enable_workload_identity" {
-  type = bool
-  default = false
-  description = "(Optional) Enable Workload Identity"
-}
-
-variable "enable_oidc_issuer" {
-  type = bool
-  default = false
-  description = "(Optional) Enable OIDC Issuer"
 }

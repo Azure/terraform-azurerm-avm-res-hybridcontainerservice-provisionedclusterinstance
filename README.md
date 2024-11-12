@@ -64,12 +64,6 @@ list(object({
   }))
 ```
 
-### <a name="input_control_plane_ip"></a> [control\_plane\_ip](#input\_control\_plane\_ip)
-
-Description: The ip address of the control plane
-
-Type: `string`
-
 ### <a name="input_custom_location_id"></a> [custom\_location\_id](#input\_custom\_location\_id)
 
 Description: The id of the Custom location that used to create hybrid aks
@@ -120,6 +114,14 @@ Type: `number`
 
 Default: `1`
 
+### <a name="input_control_plane_ip"></a> [control\_plane\_ip](#input\_control\_plane\_ip)
+
+Description: The ip address of the control plane
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_control_plane_vm_size"></a> [control\_plane\_vm\_size](#input\_control\_plane\_vm\_size)
 
 Description: The size of the control plane VM
@@ -160,6 +162,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_enable_oidc_issuer"></a> [enable\_oidc\_issuer](#input\_enable\_oidc\_issuer)
+
+Description: (Optional) Enable OIDC Issuer
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
 Description: This variable controls whether or not telemetry is enabled for the module.  
@@ -169,6 +179,14 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_enable_workload_identity"></a> [enable\_workload\_identity](#input\_enable\_workload\_identity)
+
+Description: (Optional) Enable Workload Identity
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_is_exported"></a> [is\_exported](#input\_is\_exported)
 
@@ -184,7 +202,7 @@ Description: The kubernetes version
 
 Type: `string`
 
-Default: `"1.28.5"`
+Default: `""`
 
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
