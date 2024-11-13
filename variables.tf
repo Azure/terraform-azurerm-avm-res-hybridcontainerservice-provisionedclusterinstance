@@ -91,7 +91,7 @@ variable "resource_group_id" {
 
 variable "azure_hybrid_benefit" {
   type        = string
-  default     = "False"
+  default     = "True"
   description = "The Azure Hybrid Benefit for the kubernetes cluster."
 }
 

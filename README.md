@@ -110,7 +110,7 @@ Description: The Azure Hybrid Benefit for the kubernetes cluster.
 
 Type: `string`
 
-Default: `"False"`
+Default: `"True"`
 
 ### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
 
