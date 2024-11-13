@@ -57,11 +57,6 @@ variable "agent_pool_profiles" {
   }
 }
 
-variable "control_plane_ip" {
-  type        = string
-  description = "The ip address of the control plane"
-}
-
 variable "custom_location_id" {
   type        = string
   description = "The id of the Custom location that used to create hybrid aks"
@@ -101,6 +96,12 @@ variable "control_plane_count" {
   description = "The count of the control plane"
 }
 
+variable "control_plane_ip" {
+  type        = string
+  default     = null
+  description = "The ip address of the control plane"
+}
+
 variable "control_plane_vm_size" {
   type        = string
   default     = "Standard_A4_v2"
@@ -136,6 +137,12 @@ variable "enable_azure_rbac" {
   description = "Enable Azure RBAC for the kubernetes cluster"
 }
 
+variable "enable_oidc_issuer" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enable OIDC Issuer"
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -147,6 +154,12 @@ DESCRIPTION
   nullable    = false
 }
 
+variable "enable_workload_identity" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enable Workload Identity"
+}
+
 variable "is_exported" {
   type        = bool
   default     = false
@@ -155,11 +168,11 @@ variable "is_exported" {
 
 variable "kubernetes_version" {
   type        = string
-  default     = "1.28.5"
+  default     = ""
   description = "The kubernetes version"
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
+    condition     = var.kubernetes_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
     error_message = "kubernetesVersion must be in the format of 'x.y.z'"
   }
 }

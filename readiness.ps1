@@ -1,6 +1,6 @@
 param (
     [string] $customLocationResourceId,
-    [string] $kubernetesVersion,
+    [string] $kubernetesVersion = "",
     [string] $osSku
 )
 
@@ -45,6 +45,25 @@ while ($true) {
         $state = "{$state"
     }
     $ready = $false
+
+    # Default to the latest version
+    if ($kubernetesVersion -eq "[PLACEHOLDER]")
+    {
+        $json = $state | ConvertFrom-Json
+        $latestPatchVersion = $json.properties.values |
+        ForEach-Object {
+            $_.patchVersions.PSObject.Properties |
+                ForEach-Object {
+                [PSCustomObject]@{
+                    Version = [version]$_.Name
+                    Patch   = $_.Name
+                }
+            }
+        }  |   Sort-Object Version -Descending | Select-Object -First 1
+
+        Write-Verbose "Using kubernetes version = $($latestPatchVersion.Patch)" -Verbose
+        $kubernetesVersion = $latestPatchVersion.Patch
+    }
 
     foreach ($version in (echo $state  | ConvertFrom-Json).properties.values) {
         if (!$kubernetesVersion.StartsWith($version.version)) {

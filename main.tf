@@ -26,7 +26,7 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azapi_resource" "connected_cluster" {
-  type = "Microsoft.Kubernetes/connectedClusters@2024-01-01"
+  type = "Microsoft.Kubernetes/connectedClusters@2024-07-15-preview"
   body = {
     kind = "ProvisionedCluster"
     properties = {
@@ -40,6 +40,14 @@ resource "azapi_resource" "connected_cluster" {
       provisioningState         = null
       infrastructure            = null
       distribution              = null
+      securityProfile = {
+        workloadIdentity = {
+          enabled = var.enable_workload_identity
+        }
+      }
+      oidcIssuerProfile = {
+        enabled = var.enable_oidc_issuer
+      }
     }
   }
   location  = var.location
