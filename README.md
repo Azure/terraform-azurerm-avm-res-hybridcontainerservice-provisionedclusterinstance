@@ -168,7 +168,7 @@ Description: (Optional) Enable OIDC Issuer
 
 Type: `bool`
 
-Default: `false`
+Default: `null`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -186,7 +186,7 @@ Description: (Optional) Enable Workload Identity
 
 Type: `bool`
 
-Default: `false`
+Default: `null`
 
 ### <a name="input_is_exported"></a> [is\_exported](#input\_is\_exported)
 
