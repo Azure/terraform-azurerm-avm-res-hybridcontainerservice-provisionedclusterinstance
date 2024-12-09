@@ -13,11 +13,27 @@ locals {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
   kubernetesVersion = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
-  os_sku            = var.agent_pool_profiles[0].osSKU
+  oidc_profile_full = var.enable_oidc_issuer != null ? {
+    enabled = var.enable_oidc_issuer
+    } : {
+    enabled = null
+  }
+  oidc_profile_omit_null = var.enable_oidc_issuer == true ? { for k, v in local.oidc_profile_full : k => v if v != null } : null
+  os_sku                 = var.agent_pool_profiles[0].osSKU
   # The resource group name is the last element of the split result
   resource_group_name = element(local.resource_group_parts, length(local.resource_group_parts) - 1)
   # Split the resource group ID into parts based on '/'
   resource_group_parts               = split("/", var.resource_group_id)
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-  ssh_public_key                     = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
+  security_profile_full = var.enable_workload_identity != null ? {
+    workloadIdentity = {
+      enabled = var.enable_workload_identity
+    }
+    } : {
+    workloadIdentity = {
+      enabled = null
+    }
+  }
+  security_profile_omit_null = var.enable_workload_identity == true ? { for k, v in local.security_profile_full : k => v if v.enabled != null } : null
+  ssh_public_key             = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
 }
