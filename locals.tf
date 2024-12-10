@@ -12,7 +12,7 @@ locals {
   agent_pool_profiles = [for pool in var.agent_pool_profiles : {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
-  kubernetesVersion = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
+  kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
   oidc_profile_full = var.enable_oidc_issuer != null ? {
     enabled = var.enable_oidc_issuer
     } : {
@@ -31,14 +31,8 @@ locals {
     provisioningState         = null
     infrastructure            = null
     distribution              = null
-    securityProfile = {
-      workloadIdentity = {
-        enabled = var.enable_workload_identity
-      }
-    }
-    oidcIssuerProfile = {
-      enabled = var.enable_oidc_issuer
-    }
+    securityProfile           = local.security_profile_omit_null
+    oidcIssuerProfile         = local.oidc_profile_omit_null
   }
   properties_omit_null = { for k, v in local.properties_full : k => v if v != null }
   # The resource group name is the last element of the split result
