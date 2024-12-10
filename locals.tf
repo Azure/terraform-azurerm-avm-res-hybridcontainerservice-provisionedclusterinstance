@@ -20,6 +20,27 @@ locals {
   }
   oidc_profile_omit_null = var.enable_oidc_issuer == true ? { for k, v in local.oidc_profile_full : k => v if v != null } : null
   os_sku                 = var.agent_pool_profiles[0].osSKU
+  properties_full = {
+    arcAgentProfile = {
+      agentAutoUpgrade = "Enabled"
+    }
+    aadProfile                = local.aad_profile_omit_null
+    agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
+    azureHybridBenefit        = null
+    privateLinkState          = null
+    provisioningState         = null
+    infrastructure            = null
+    distribution              = null
+    securityProfile = {
+      workloadIdentity = {
+        enabled = var.enable_workload_identity
+      }
+    }
+    oidcIssuerProfile = {
+      enabled = var.enable_oidc_issuer
+    }
+  }
+  properties_omit_null = { for k, v in local.properties_full : k => v if v != null }
   # The resource group name is the last element of the split result
   resource_group_name = element(local.resource_group_parts, length(local.resource_group_parts) - 1)
   # Split the resource group ID into parts based on '/'
