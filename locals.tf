@@ -26,14 +26,16 @@ locals {
     }
     aadProfile                = local.aad_profile_omit_null
     agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
-    azureHybridBenefit        = null
-    privateLinkState          = null
-    provisioningState         = null
-    infrastructure            = null
-    distribution              = null
     securityProfile           = local.security_profile_omit_null
     oidcIssuerProfile         = local.oidc_profile_omit_null
   }
+  properties_with_nulls = merge(local.properties_omit_null, {
+    azureHybridBenefit = null
+    privateLinkState   = null
+    provisioningState  = null
+    infrastructure     = null
+    distribution       = null
+  })
   properties_omit_null = { for k, v in local.properties_full : k => v if v != null }
   # The resource group name is the last element of the split result
   resource_group_name = element(local.resource_group_parts, length(local.resource_group_parts) - 1)
