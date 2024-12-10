@@ -28,27 +28,8 @@ data "azurerm_client_config" "current" {
 resource "azapi_resource" "connected_cluster" {
   type = "Microsoft.Kubernetes/connectedClusters@2024-07-15-preview"
   body = {
-    kind = "ProvisionedCluster"
-    properties = {
-      arcAgentProfile = {
-        agentAutoUpgrade = "Enabled"
-      }
-      aadProfile                = local.aad_profile_omit_null
-      agentPublicKeyCertificate = "" # agentPublicKeyCertificate input must be empty for Connected Cluster of Kind: Provisioned Cluster
-      azureHybridBenefit        = null
-      privateLinkState          = null
-      provisioningState         = null
-      infrastructure            = null
-      distribution              = null
-      securityProfile = {
-        workloadIdentity = {
-          enabled = var.enable_workload_identity
-        }
-      }
-      oidcIssuerProfile = {
-        enabled = var.enable_oidc_issuer
-      }
-    }
+    kind       = "ProvisionedCluster"
+    properties = local.properties_with_nulls
   }
   location  = var.location
   name      = var.name

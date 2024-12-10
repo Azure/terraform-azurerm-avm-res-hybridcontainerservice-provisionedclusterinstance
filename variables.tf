@@ -139,7 +139,7 @@ variable "enable_azure_rbac" {
 
 variable "enable_oidc_issuer" {
   type        = bool
-  default     = false
+  default     = null
   description = "(Optional) Enable OIDC Issuer"
 }
 
@@ -156,7 +156,7 @@ DESCRIPTION
 
 variable "enable_workload_identity" {
   type        = bool
-  default     = false
+  default     = null
   description = "(Optional) Enable Workload Identity"
 }
 
@@ -173,7 +173,7 @@ variable "kubernetes_version" {
 
   validation {
     condition     = var.kubernetes_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
-    error_message = "kubernetesVersion must be in the format of 'x.y.z'"
+    error_message = "kubernetes_version must be in the format of 'x.y.z'"
   }
 }
 
