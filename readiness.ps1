@@ -19,14 +19,6 @@ while ($true) {
     $url = "https://management.azure.com${customLocationResourceId}/providers/Microsoft.HybridContainerService/kubernetesVersions/default?api-version=2024-01-01"
     echo "Deleting default version to keep sync: $url"
     az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method DELETE
-
-    Write-Host "After deleting, puting..."
-    $requestBody = '{\"extendedLocation\":{\"type\":\"CustomLocation\",\"name\":\"$customLocationResourceId\"}}'.Replace('$customLocationResourceId', $customLocationResourceId)
-    az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
-      --uri $url `
-      --method PUT `
-      --body $requestBody
-
     while ($true) {
         $state = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET
         if (-not $state) {
@@ -34,6 +26,14 @@ while ($true) {
         }
         sleep 5
     }
+
+    Write-Host "After deleting, puting..."
+    $requestBody = '{\"extendedLocation\":{\"type\":\"CustomLocation\",\"name\":\"$customLocationResourceId\"}}'.Replace('$customLocationResourceId', $customLocationResourceId)
+    az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
+      --uri $url `
+      --method PUT `
+      --body $requestBody
+  
     sleep 60
     echo "Getting versions"
     $state = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET
