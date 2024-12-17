@@ -84,6 +84,61 @@ variable "resource_group_id" {
   description = "The resource group id where the resources will be deployed."
 }
 
+variable "additional_nodepools" {
+  type = map(object({
+    count             = number
+    enableAutoScaling = optional(bool, false)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+  }))
+  default     = {}
+  description = "Map of agent pool configurations"
+
+  validation {
+    condition = length([
+      for name, profile in var.additional_nodepools : true
+      if profile.enableAutoScaling == false || profile.enableAutoScaling == null
+    ]) == length(var.additional_nodepools)
+    error_message = "Agent pools enableAutoScaling is not supported yet"
+  }
+  validation {
+    condition = length([
+      for name, profile in var.additional_nodepools : true
+      if profile.osType == null
+      || contains(["Linux", "Windows"], profile.osType)
+    ]) == length(var.additional_nodepools)
+    error_message = "Agent pools osType must be either 'Linux' or 'Windows'"
+  }
+  validation {
+    condition = length([
+      for name, profile in var.additional_nodepools : true
+      if profile.osSKU == null
+      || contains(["CBLMariner", "Windows2019", "Windows2022"], profile.osSKU)
+    ]) == length(var.additional_nodepools)
+    error_message = "Agent pools osSKU must be either 'CBLMariner', 'Windows2019' or 'Windows2022'"
+  }
+  validation {
+    condition = length([
+      for name, profile in var.additional_nodepools : true
+      if profile.osType == null || profile.osSKU == null
+      || !contains(["Linux"], profile.osType) || contains(["CBLMariner"], profile.osSKU)
+    ]) == length(var.additional_nodepools)
+    error_message = "Agent pools osSKU must be 'CBLMariner' if osType is 'Linux'"
+  }
+  validation {
+    condition = length([
+      for name, profile in var.additional_nodepools : true
+      if profile.osType == null || profile.osSKU == null
+      || !contains(["Windows"], profile.osType) || contains(["Windows2019", "Windows2022"], profile.osSKU)
+    ]) == length(var.additional_nodepools)
+    error_message = "Agent pools osSKU must be 'Windows2019' or 'Windows2022' if osType is 'Windows'"
+  }
+}
+
 variable "azure_hybrid_benefit" {
   type        = string
   default     = "False"
@@ -106,6 +161,12 @@ variable "control_plane_vm_size" {
   type        = string
   default     = "Standard_A4_v2"
   description = "The size of the control plane VM"
+}
+
+variable "create_additional_nodepool" {
+  type        = bool
+  default     = false
+  description = "Whether to create additional agent pool"
 }
 
 # required AVM interfaces

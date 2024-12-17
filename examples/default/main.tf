@@ -64,4 +64,6 @@ module "test" {
   control_plane_ip            = var.control_plane_ip
   control_plane_count         = var.control_plane_count
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
+  create_additional_nodepool  = var.create_additional_nodepool
+  additional_nodepools        = var.additional_nodepools
 }

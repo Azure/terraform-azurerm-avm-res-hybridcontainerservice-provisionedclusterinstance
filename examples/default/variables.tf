@@ -23,6 +23,29 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
+variable "additional_nodepools" {
+  type = map(object({
+    count             = number
+    enableAutoScaling = optional(bool, false)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+  }))
+  default = {
+    "default_pool" = {
+      count               = 1
+      enable_auto_scaling = false
+      os_sku              = "CBLMariner"
+      os_type             = "Linux"
+      vm_size             = "Standard_D2s_v3"
+    }
+  }
+  description = "Map of agent pool configurations"
+}
+
 variable "agent_pool_profiles" {
   type = list(object({
     count             = number
@@ -52,6 +75,12 @@ variable "control_plane_ip" {
   type        = string
   default     = "192.168.1.190"
   description = "The IP address of the control plane"
+}
+
+variable "create_additional_nodepool" {
+  type        = bool
+  default     = true
+  description = "Whether to create additional agent pool"
 }
 
 variable "enable_telemetry" {

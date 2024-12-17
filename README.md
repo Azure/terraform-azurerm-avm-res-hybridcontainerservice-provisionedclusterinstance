@@ -24,6 +24,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.agent_pool](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.connected_cluster](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.provisioned_cluster_instance](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azurerm_key_vault_secret.ssh_private_key_pem](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
@@ -98,6 +99,27 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_additional_nodepools"></a> [additional\_nodepools](#input\_additional\_nodepools)
+
+Description: Map of agent pool configurations
+
+Type:
+
+```hcl
+map(object({
+    count             = number
+    enableAutoScaling = optional(bool, false)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+  }))
+```
+
+Default: `{}`
+
 ### <a name="input_azure_hybrid_benefit"></a> [azure\_hybrid\_benefit](#input\_azure\_hybrid\_benefit)
 
 Description: The Azure Hybrid Benefit for the kubernetes cluster.
@@ -129,6 +151,14 @@ Description: The size of the control plane VM
 Type: `string`
 
 Default: `"Standard_A4_v2"`
+
+### <a name="input_create_additional_nodepool"></a> [create\_additional\_nodepool](#input\_create\_additional\_nodepool)
+
+Description: Whether to create additional agent pool
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 

@@ -125,3 +125,28 @@ resource "azapi_resource" "provisioned_cluster_instance" {
     ]
   }
 }
+
+resource "azapi_resource" "agent_pool" {
+  count    = var.create_additional_nodepool ? 1 : 0
+  for_each = var.additional_nodepools
+
+  type = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
+  body = {
+    extendedLocation = {
+      name = var.custom_location_id
+      type = "CustomLocation"
+    }
+    properties = {
+      count             = each.value.count
+      enableAutoScaling = each.value.enableAutoScaling
+      nodeLabels        = each.value.nodeLabels
+      nodeTaints        = each.value.nodeTaints
+      maxPods           = each.value.maxPods
+      osSKU             = each.value.osSKU
+      osType            = each.value.osType
+      vmSize            = each.value.vmSize
+    }
+  }
+  name      = each.key
+  parent_id = resource.azapi_resource.provisioned_cluster_instance.id
+}

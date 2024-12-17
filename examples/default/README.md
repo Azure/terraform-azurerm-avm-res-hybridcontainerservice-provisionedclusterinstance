@@ -70,6 +70,8 @@ module "test" {
   control_plane_ip            = var.control_plane_ip
   control_plane_count         = var.control_plane_count
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
+  create_additional_nodepool  = var.create_additional_nodepool
+  additional_nodepools        = var.additional_nodepools
 }
 ```
 
@@ -132,6 +134,39 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_additional_nodepools"></a> [additional\_nodepools](#input\_additional\_nodepools)
+
+Description: Map of agent pool configurations
+
+Type:
+
+```hcl
+map(object({
+    count             = number
+    enableAutoScaling = optional(bool, false)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+  }))
+```
+
+Default:
+
+```json
+{
+  "default_pool": {
+    "count": 1,
+    "enable_auto_scaling": false,
+    "os_sku": "CBLMariner",
+    "os_type": "Linux",
+    "vm_size": "Standard_D2s_v3"
+  }
+}
+```
+
 ### <a name="input_agent_pool_profiles"></a> [agent\_pool\_profiles](#input\_agent\_pool\_profiles)
 
 Description: The agent pool profiles for the Kubernetes cluster.
@@ -178,6 +213,14 @@ Description: The IP address of the control plane
 Type: `string`
 
 Default: `"192.168.1.190"`
+
+### <a name="input_create_additional_nodepool"></a> [create\_additional\_nodepool](#input\_create\_additional\_nodepool)
+
+Description: Whether to create additional agent pool
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
