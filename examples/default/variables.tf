@@ -1,25 +1,30 @@
 variable "aks_arc_name" {
   type        = string
+  default = "test"
   description = "The name of the hybrid aks"
 }
 
 variable "custom_location_name" {
   type        = string
+  default="hxiacgh1-customlocation"
   description = "The name of the custom location."
 }
 
 variable "keyvault_name" {
   type        = string
+  default = "hxiacgh1-kv-44"
   description = "The name of the key vault."
 }
 
 variable "logical_network_name" {
   type        = string
+  default = "hxiacgh1-logicalnetwork"
   description = "The name of the logical network"
 }
 
 variable "resource_group_name" {
   type        = string
+  default = "hxiacgh1-rg"
   description = "The resource group where the resources will be deployed."
 }
 
@@ -35,12 +40,11 @@ variable "additional_nodepools" {
     vmSize            = optional(string)
   }))
   default = {
-    "default_pool" = {
+    "pool1" = {
       count               = 1
       enable_auto_scaling = false
       os_sku              = "CBLMariner"
       os_type             = "Linux"
-      vm_size             = "Standard_D2s_v3"
     }
   }
   description = "Map of agent pool configurations"
@@ -73,7 +77,7 @@ variable "control_plane_count" {
 
 variable "control_plane_ip" {
   type        = string
-  default     = "192.168.1.190"
+  default     = "192.168.1.191"
   description = "The IP address of the control plane"
 }
 

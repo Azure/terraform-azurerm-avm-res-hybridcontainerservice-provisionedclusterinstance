@@ -127,7 +127,6 @@ resource "azapi_resource" "provisioned_cluster_instance" {
 }
 
 resource "azapi_resource" "agent_pool" {
-  count    = var.create_additional_nodepool ? 1 : 0
   for_each = var.additional_nodepools
 
   type = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"

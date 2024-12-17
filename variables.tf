@@ -98,6 +98,13 @@ variable "additional_nodepools" {
   default     = {}
   description = "Map of agent pool configurations"
 
+validation {
+    condition = alltrue([
+      for k in keys(var.additional_nodepools) : 
+      can(regex("^[a-z][a-z0-9]{2,11}$", k))
+    ])
+    error_message = "Nodepool names must start with a lowercase letter and can only contain lowercase letters and numbers. Length must be between 3-12 characters."
+  }
   validation {
     condition = length([
       for name, profile in var.additional_nodepools : true
@@ -333,7 +340,7 @@ variable "ssh_key_vault_id" {
 
 variable "ssh_private_key_pem_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPrivateKeyPem"
+  default     = "AksArcAgentSshPrivateKeyPem1"
   description = "The name of the secret in the key vault that contains the SSH private key PEM."
 }
 
@@ -345,7 +352,7 @@ variable "ssh_public_key" {
 
 variable "ssh_public_key_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPublicKey"
+  default     = "AksArcAgentSshPublicKey1"
   description = "The name of the secret in the key vault that contains the SSH public key."
 }
 
