@@ -135,8 +135,18 @@ resource "azapi_resource" "agent_pool" {
       name = var.custom_location_id
       type = "CustomLocation"
     }
-    properties = local.additional_nodepools[count.index]
+    properties = merge(local.additional_nodepools[count.index],
+      {
+        status = null
+      }
+    )
   }
   name      = var.additional_nodepools[count.index].name
   parent_id = resource.azapi_resource.provisioned_cluster_instance.id
+
+  lifecycle {
+    ignore_changes = [
+      body.properties.status
+    ]
+  }
 }
