@@ -85,7 +85,8 @@ variable "resource_group_id" {
 }
 
 variable "additional_nodepools" {
-  type = map(object({
+  type = list(object({
+    name              = string
     count             = number
     enableAutoScaling = optional(bool, false)
     nodeTaints        = optional(list(string))
@@ -95,52 +96,52 @@ variable "additional_nodepools" {
     osType            = optional(string, "Linux")
     vmSize            = optional(string)
   }))
-  default     = {}
+  default     = []
   description = "Map of agent pool configurations"
 
-validation {
+  validation {
     condition = alltrue([
-      for k in keys(var.additional_nodepools) : 
-      can(regex("^[a-z][a-z0-9]{2,11}$", k))
+      for nodepool in var.additional_nodepools :
+      can(regex("^[a-z][a-z0-9]{2,11}$", nodepool.name))
     ])
     error_message = "Nodepool names must start with a lowercase letter and can only contain lowercase letters and numbers. Length must be between 3-12 characters."
   }
   validation {
     condition = length([
-      for name, profile in var.additional_nodepools : true
-      if profile.enableAutoScaling == false || profile.enableAutoScaling == null
+      for nodepool in var.additional_nodepools : true
+      if nodepool.enableAutoScaling == false || nodepool.enableAutoScaling == null
     ]) == length(var.additional_nodepools)
     error_message = "Agent pools enableAutoScaling is not supported yet"
   }
   validation {
     condition = length([
-      for name, profile in var.additional_nodepools : true
-      if profile.osType == null
-      || contains(["Linux", "Windows"], profile.osType)
+      for nodepool in var.additional_nodepools : true
+      if nodepool.osType == null
+      || contains(["Linux", "Windows"], nodepool.osType)
     ]) == length(var.additional_nodepools)
     error_message = "Agent pools osType must be either 'Linux' or 'Windows'"
   }
   validation {
     condition = length([
-      for name, profile in var.additional_nodepools : true
-      if profile.osSKU == null
-      || contains(["CBLMariner", "Windows2019", "Windows2022"], profile.osSKU)
+      for nodepool in var.additional_nodepools : true
+      if nodepool.osSKU == null
+      || contains(["CBLMariner", "Windows2019", "Windows2022"], nodepool.osSKU)
     ]) == length(var.additional_nodepools)
     error_message = "Agent pools osSKU must be either 'CBLMariner', 'Windows2019' or 'Windows2022'"
   }
   validation {
     condition = length([
-      for name, profile in var.additional_nodepools : true
-      if profile.osType == null || profile.osSKU == null
-      || !contains(["Linux"], profile.osType) || contains(["CBLMariner"], profile.osSKU)
+      for nodepool in var.additional_nodepools : true
+      if nodepool.osType == null || nodepool.osSKU == null
+      || !contains(["Linux"], nodepool.osType) || contains(["CBLMariner"], nodepool.osSKU)
     ]) == length(var.additional_nodepools)
     error_message = "Agent pools osSKU must be 'CBLMariner' if osType is 'Linux'"
   }
   validation {
     condition = length([
-      for name, profile in var.additional_nodepools : true
-      if profile.osType == null || profile.osSKU == null
-      || !contains(["Windows"], profile.osType) || contains(["Windows2019", "Windows2022"], profile.osSKU)
+      for nodepool in var.additional_nodepools : true
+      if nodepool.osType == null || nodepool.osSKU == null
+      || !contains(["Windows"], nodepool.osType) || contains(["Windows2019", "Windows2022"], nodepool.osSKU)
     ]) == length(var.additional_nodepools)
     error_message = "Agent pools osSKU must be 'Windows2019' or 'Windows2022' if osType is 'Windows'"
   }
@@ -168,12 +169,6 @@ variable "control_plane_vm_size" {
   type        = string
   default     = "Standard_A4_v2"
   description = "The size of the control plane VM"
-}
-
-variable "create_additional_nodepool" {
-  type        = bool
-  default     = false
-  description = "Whether to create additional agent pool"
 }
 
 # required AVM interfaces
@@ -340,7 +335,7 @@ variable "ssh_key_vault_id" {
 
 variable "ssh_private_key_pem_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPrivateKeyPem1"
+  default     = "AksArcAgentSshPrivateKeyPem3"
   description = "The name of the secret in the key vault that contains the SSH private key PEM."
 }
 
@@ -352,7 +347,7 @@ variable "ssh_public_key" {
 
 variable "ssh_public_key_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPublicKey1"
+  default     = "AksArcAgentSshPublicKey3"
   description = "The name of the secret in the key vault that contains the SSH public key."
 }
 

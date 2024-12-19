@@ -127,7 +127,7 @@ resource "azapi_resource" "provisioned_cluster_instance" {
 }
 
 resource "azapi_resource" "agent_pool" {
-  for_each = var.additional_nodepools
+  count = length(var.additional_nodepools)
 
   type = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
   body = {
@@ -136,16 +136,16 @@ resource "azapi_resource" "agent_pool" {
       type = "CustomLocation"
     }
     properties = {
-      count             = each.value.count
-      enableAutoScaling = each.value.enableAutoScaling
-      nodeLabels        = each.value.nodeLabels
-      nodeTaints        = each.value.nodeTaints
-      maxPods           = each.value.maxPods
-      osSKU             = each.value.osSKU
-      osType            = each.value.osType
-      vmSize            = each.value.vmSize
+      count             = var.additional_nodepools[count.index].count
+      enableAutoScaling = var.additional_nodepools[count.index].enableAutoScaling
+      nodeLabels        = var.additional_nodepools[count.index].nodeLabels
+      nodeTaints        = var.additional_nodepools[count.index].nodeTaints
+      maxPods           = var.additional_nodepools[count.index].maxPods
+      osSKU             = var.additional_nodepools[count.index].osSKU
+      osType            = var.additional_nodepools[count.index].osType
+      vmSize            = var.additional_nodepools[count.index].vmSize
     }
   }
-  name      = each.key
+  name      = var.additional_nodepools[count.index].name
   parent_id = resource.azapi_resource.provisioned_cluster_instance.id
 }
