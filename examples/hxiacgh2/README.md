@@ -48,6 +48,31 @@ data "azurerm_key_vault" "deployment_key_vault" {
   resource_group_name = var.resource_group_name
 }
 
+# import {
+#   id = "https://hxiacgh2-kv-97.vault.azure.net/secrets/AksArcAgentSshPrivateKeyPem1/305fe9226d2243cfb2d946546f365433"
+#   to = module.test.azurerm_key_vault_secret.ssh_private_key_pem[0]
+# }
+
+# import {
+#   id = "https://hxiacgh2-kv-97.vault.azure.net/secrets/AksArcAgentSshPublicKey1/2990442280674a829f2970129ad4ce34"
+#   to = module.test.azurerm_key_vault_secret.ssh_public_key[0]
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test?api-version=2024-01-01"
+#   to = module.test.azapi_resource.connected_cluster
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default?api-version=2024-01-01"
+#   to = module.test.azapi_resource.provisioned_cluster_instance
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default/agentPools/pool1?api-version=2024-01-01"
+#   to = module.test.azapi_resource.agent_pool[0]
+# }
+
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
@@ -97,37 +122,7 @@ The following resources are used by this module:
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_aks_arc_name"></a> [aks\_arc\_name](#input\_aks\_arc\_name)
-
-Description: The name of the hybrid aks
-
-Type: `string`
-
-### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
-
-Description: The name of the custom location.
-
-Type: `string`
-
-### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
-
-Description: The name of the key vault.
-
-Type: `string`
-
-### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
-
-Description: The name of the logical network
-
-Type: `string`
-
-### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
-
-Description: The resource group where the resources will be deployed.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
@@ -200,20 +195,17 @@ Default:
     "nodeTaints": [
       "key1=value1:NoExecute"
     ]
-  },
-  {
-    "count": 1,
-    "enableAutoScaling": false,
-    "maxPods": 30,
-    "nodeLabels": {
-      "nodepool": "default"
-    },
-    "nodeTaints": [
-      "key2=value2:NoExecute"
-    ]
   }
 ]
 ```
+
+### <a name="input_aks_arc_name"></a> [aks\_arc\_name](#input\_aks\_arc\_name)
+
+Description: The name of the hybrid aks
+
+Type: `string`
+
+Default: `"test3"`
 
 ### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
 
@@ -229,7 +221,15 @@ Description: The IP address of the control plane
 
 Type: `string`
 
-Default: `"192.168.1.190"`
+Default: `"192.168.1.193"`
+
+### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
+
+Description: The name of the custom location.
+
+Type: `string`
+
+Default: `"hxiacgh2-customlocation"`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -240,6 +240,22 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
+
+Description: The name of the key vault.
+
+Type: `string`
+
+Default: `"hxiacgh2-kv-97"`
+
+### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
+
+Description: The name of the logical network
+
+Type: `string`
+
+Default: `"hxiacgh2-logicalnetwork"`
 
 ### <a name="input_rbac_admin_group_object_ids"></a> [rbac\_admin\_group\_object\_ids](#input\_rbac\_admin\_group\_object\_ids)
 
@@ -254,6 +270,14 @@ Default:
   "ed888f99-66c1-48fe-992f-030f49ba50ed"
 ]
 ```
+
+### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+
+Description: The resource group where the resources will be deployed.
+
+Type: `string`
+
+Default: `"hxiacgh2-rg"`
 
 ## Outputs
 

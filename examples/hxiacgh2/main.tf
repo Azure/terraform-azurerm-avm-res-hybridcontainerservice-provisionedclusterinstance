@@ -42,6 +42,31 @@ data "azurerm_key_vault" "deployment_key_vault" {
   resource_group_name = var.resource_group_name
 }
 
+# import {
+#   id = "https://hxiacgh2-kv-97.vault.azure.net/secrets/AksArcAgentSshPrivateKeyPem1/305fe9226d2243cfb2d946546f365433"
+#   to = module.test.azurerm_key_vault_secret.ssh_private_key_pem[0]
+# }
+
+# import {
+#   id = "https://hxiacgh2-kv-97.vault.azure.net/secrets/AksArcAgentSshPublicKey1/2990442280674a829f2970129ad4ce34"
+#   to = module.test.azurerm_key_vault_secret.ssh_public_key[0]
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test?api-version=2024-01-01"
+#   to = module.test.azapi_resource.connected_cluster
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default?api-version=2024-01-01"
+#   to = module.test.azapi_resource.provisioned_cluster_instance
+# }
+
+# import {
+#   id = "/subscriptions/de3c4d5e-af08-451a-a873-438d86ab6f4b/resourceGroups/hxiacgh2-rg/providers/Microsoft.Kubernetes/connectedClusters/test/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default/agentPools/pool1?api-version=2024-01-01"
+#   to = module.test.azapi_resource.agent_pool[0]
+# }
+
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location

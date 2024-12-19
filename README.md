@@ -106,7 +106,8 @@ Description: Map of agent pool configurations
 Type:
 
 ```hcl
-map(object({
+list(object({
+    name              = string
     count             = number
     enableAutoScaling = optional(bool, false)
     nodeTaints        = optional(list(string))
@@ -118,7 +119,7 @@ map(object({
   }))
 ```
 
-Default: `{}`
+Default: `[]`
 
 ### <a name="input_azure_hybrid_benefit"></a> [azure\_hybrid\_benefit](#input\_azure\_hybrid\_benefit)
 
@@ -151,14 +152,6 @@ Description: The size of the control plane VM
 Type: `string`
 
 Default: `"Standard_A4_v2"`
-
-### <a name="input_create_additional_nodepool"></a> [create\_additional\_nodepool](#input\_create\_additional\_nodepool)
-
-Description: Whether to create additional agent pool
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
@@ -346,7 +339,7 @@ Description: The name of the secret in the key vault that contains the SSH priva
 
 Type: `string`
 
-Default: `"AksArcAgentSshPrivateKeyPem"`
+Default: `"AksArcAgentSshPrivateKeyPem3"`
 
 ### <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key)
 
@@ -362,7 +355,7 @@ Description: The name of the secret in the key vault that contains the SSH publi
 
 Type: `string`
 
-Default: `"AksArcAgentSshPublicKey"`
+Default: `"AksArcAgentSshPublicKey3"`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 

@@ -9,6 +9,18 @@ locals {
     tenantID            = null
   }
   aad_profile_omit_null = { for k, v in local.aad_profile_full : k => v if v != null }
+  additional_nodepools = [for pool in var.additional_nodepools : {
+    for k, v in {
+      count             = pool.count
+      enableAutoScaling = pool.enableAutoScaling
+      nodeLabels        = pool.nodeLabels
+      nodeTaints        = pool.nodeTaints
+      maxPods           = pool.maxPods
+      osSKU             = pool.osSKU
+      osType            = pool.osType
+      vmSize            = pool.vmSize
+    } : k => v if v != null
+  }]
   agent_pool_profiles = [for pool in var.agent_pool_profiles : {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
@@ -53,16 +65,4 @@ locals {
   }
   security_profile_omit_null = var.enable_workload_identity == true ? { for k, v in local.security_profile_full : k => v if v.enabled != null } : null
   ssh_public_key             = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
-  additional_nodepools = [for pool in var.additional_nodepools : {
-    for k, v in {
-      count             = pool.count
-      enableAutoScaling = pool.enableAutoScaling
-      nodeLabels        = pool.nodeLabels
-      nodeTaints        = pool.nodeTaints
-      maxPods           = pool.maxPods
-      osSKU             = pool.osSKU
-      osType            = pool.osType
-      vmSize            = pool.vmSize
-    } : k => v if v != null
-  }]
 }
