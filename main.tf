@@ -135,16 +135,7 @@ resource "azapi_resource" "agent_pool" {
       name = var.custom_location_id
       type = "CustomLocation"
     }
-    properties = {
-      count             = var.additional_nodepools[count.index].count
-      enableAutoScaling = var.additional_nodepools[count.index].enableAutoScaling
-      nodeLabels        = var.additional_nodepools[count.index].nodeLabels
-      nodeTaints        = var.additional_nodepools[count.index].nodeTaints
-      maxPods           = var.additional_nodepools[count.index].maxPods
-      osSKU             = var.additional_nodepools[count.index].osSKU
-      osType            = var.additional_nodepools[count.index].osType
-      vmSize            = var.additional_nodepools[count.index].vmSize
-    }
+    properties = local.additional_nodepools[count.index]
   }
   name      = var.additional_nodepools[count.index].name
   parent_id = resource.azapi_resource.provisioned_cluster_instance.id
