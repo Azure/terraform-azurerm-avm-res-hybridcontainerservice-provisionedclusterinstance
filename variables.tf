@@ -88,7 +88,7 @@ variable "additional_nodepools" {
   type = list(object({
     name              = string
     count             = number
-    enableAutoScaling = optional(bool, false)
+    enableAutoScaling = optional(bool)
     nodeTaints        = optional(list(string))
     nodeLabels        = optional(map(string))
     maxPods           = optional(number)
