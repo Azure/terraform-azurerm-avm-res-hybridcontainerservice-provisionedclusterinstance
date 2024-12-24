@@ -36,11 +36,26 @@ locals {
     )
   }
   extended_location_omit_null = {
-    for k, v in local.extended_location_full : k => {
+    for k, v in local.extended_location_full : k => (
+      alltrue([for _, val in v : val == null]) ? null : {
+        for key, val in v : key => val if val != null
+      }
+    )
+  }
+  kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
+  nodepool_bodies_full = {
+    for k, v in local.extended_location_omit_null : k => {
+      properties = merge(local.additional_nodepools[k], {
+        status = null
+      })
+      extendedLocation = v
+    }
+  }
+  nodepool_bodies_omit_null = {
+    for k, v in local.nodepool_bodies_full : k => {
       for key, val in v : key => val if val != null
     }
   }
-  kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
   oidc_profile_full = var.enable_oidc_issuer != null ? {
     enabled = var.enable_oidc_issuer
     } : {
