@@ -23,6 +23,30 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
+variable "additional_nodepools" {
+  type = list(object({
+    name              = string
+    count             = number
+    enableAutoScaling = optional(bool)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+    original          = optional(bool, false)
+  }))
+  default = [
+    {
+      name    = "pool1"
+      count   = 1
+      os_sku  = "CBLMariner"
+      os_type = "Linux"
+    }
+  ]
+  description = "Map of agent pool configurations"
+}
+
 variable "agent_pool_profiles" {
   type = list(object({
     count             = number
@@ -38,7 +62,26 @@ variable "agent_pool_profiles" {
   default = [{
     count             = 1
     enableAutoScaling = false
-  }]
+    nodeTaints = [
+      "key1=value1:NoExecute"
+    ]
+    nodeLabels = {
+      "nodepool" = "default"
+    }
+    maxPods = 30
+    },
+    {
+      count             = 1
+      enableAutoScaling = false
+      nodeTaints = [
+        "key2=value2:NoExecute"
+      ]
+      nodeLabels = {
+        "nodepool" = "default"
+      }
+      maxPods = 30
+    }
+  ]
   description = "The agent pool profiles for the Kubernetes cluster."
 }
 

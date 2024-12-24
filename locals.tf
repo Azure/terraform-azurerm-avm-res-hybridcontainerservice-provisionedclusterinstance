@@ -9,10 +9,53 @@ locals {
     tenantID            = null
   }
   aad_profile_omit_null = { for k, v in local.aad_profile_full : k => v if v != null }
+  additional_nodepools = [for pool in var.additional_nodepools : {
+    for k, v in {
+      count             = pool.count
+      enableAutoScaling = pool.enableAutoScaling
+      nodeLabels        = pool.nodeLabels
+      nodeTaints        = pool.nodeTaints
+      maxPods           = pool.maxPods
+      osSKU             = pool.osSKU
+      osType            = pool.osType
+      vmSize            = pool.vmSize
+    } : k => v if v != null
+  }]
   agent_pool_profiles = [for pool in var.agent_pool_profiles : {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
+  extended_location_full = {
+    for idx, pool in var.additional_nodepools : idx => (
+      pool.original != true ? {
+        name = var.custom_location_id
+        type = "CustomLocation"
+        } : {
+        name = null
+        type = null
+      }
+    )
+  }
+  extended_location_omit_null = {
+    for k, v in local.extended_location_full : k => (
+      alltrue([for _, val in v : val == null]) ? null : {
+        for key, val in v : key => val if val != null
+      }
+    )
+  }
   kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
+  nodepool_bodies_full = {
+    for k, v in local.extended_location_omit_null : k => {
+      properties = merge(local.additional_nodepools[k], {
+        status = null
+      })
+      extendedLocation = v
+    }
+  }
+  nodepool_bodies_omit_null = {
+    for k, v in local.nodepool_bodies_full : k => {
+      for key, val in v : key => val if val != null
+    }
+  }
   oidc_profile_full = var.enable_oidc_issuer != null ? {
     enabled = var.enable_oidc_issuer
     } : {

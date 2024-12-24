@@ -125,3 +125,18 @@ resource "azapi_resource" "provisioned_cluster_instance" {
     ]
   }
 }
+
+resource "azapi_resource" "agent_pool" {
+  count = length(var.additional_nodepools)
+
+  type      = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
+  body      = local.nodepool_bodies_omit_null[count.index]
+  name      = var.additional_nodepools[count.index].name
+  parent_id = resource.azapi_resource.provisioned_cluster_instance.id
+
+  lifecycle {
+    ignore_changes = [
+      body.properties.status
+    ]
+  }
+}

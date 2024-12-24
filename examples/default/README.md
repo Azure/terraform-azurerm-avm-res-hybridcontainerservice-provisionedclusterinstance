@@ -70,6 +70,7 @@ module "test" {
   control_plane_ip            = var.control_plane_ip
   control_plane_count         = var.control_plane_count
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
+  additional_nodepools        = var.additional_nodepools
 }
 ```
 
@@ -132,6 +133,40 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_additional_nodepools"></a> [additional\_nodepools](#input\_additional\_nodepools)
+
+Description: Map of agent pool configurations
+
+Type:
+
+```hcl
+list(object({
+    name              = string
+    count             = number
+    enableAutoScaling = optional(bool)
+    nodeTaints        = optional(list(string))
+    nodeLabels        = optional(map(string))
+    maxPods           = optional(number)
+    osSKU             = optional(string, "CBLMariner")
+    osType            = optional(string, "Linux")
+    vmSize            = optional(string)
+    original          = optional(bool, false)
+  }))
+```
+
+Default:
+
+```json
+[
+  {
+    "count": 1,
+    "name": "pool1",
+    "os_sku": "CBLMariner",
+    "os_type": "Linux"
+  }
+]
+```
+
 ### <a name="input_agent_pool_profiles"></a> [agent\_pool\_profiles](#input\_agent\_pool\_profiles)
 
 Description: The agent pool profiles for the Kubernetes cluster.
@@ -158,7 +193,25 @@ Default:
 [
   {
     "count": 1,
-    "enableAutoScaling": false
+    "enableAutoScaling": false,
+    "maxPods": 30,
+    "nodeLabels": {
+      "nodepool": "default"
+    },
+    "nodeTaints": [
+      "key1=value1:NoExecute"
+    ]
+  },
+  {
+    "count": 1,
+    "enableAutoScaling": false,
+    "maxPods": 30,
+    "nodeLabels": {
+      "nodepool": "default"
+    },
+    "nodeTaints": [
+      "key2=value2:NoExecute"
+    ]
   }
 ]
 ```
