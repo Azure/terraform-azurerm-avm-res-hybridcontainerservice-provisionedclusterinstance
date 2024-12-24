@@ -116,6 +116,7 @@ list(object({
     osSKU             = optional(string, "CBLMariner")
     osType            = optional(string, "Linux")
     vmSize            = optional(string)
+    original          = optional(bool, false)
   }))
 ```
 
@@ -339,7 +340,7 @@ Description: The name of the secret in the key vault that contains the SSH priva
 
 Type: `string`
 
-Default: `"AksArcAgentSshPrivateKeyPem3"`
+Default: `"AksArcAgentSshPrivateKeyPem"`
 
 ### <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key)
 
@@ -355,7 +356,7 @@ Description: The name of the secret in the key vault that contains the SSH publi
 
 Type: `string`
 
-Default: `"AksArcAgentSshPublicKey3"`
+Default: `"AksArcAgentSshPublicKey"`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 

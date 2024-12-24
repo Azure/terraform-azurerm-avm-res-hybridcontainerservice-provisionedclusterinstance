@@ -95,6 +95,7 @@ variable "additional_nodepools" {
     osSKU             = optional(string, "CBLMariner")
     osType            = optional(string, "Linux")
     vmSize            = optional(string)
+    original          = optional(bool, false)
   }))
   default     = []
   description = "Map of agent pool configurations"
@@ -335,7 +336,7 @@ variable "ssh_key_vault_id" {
 
 variable "ssh_private_key_pem_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPrivateKeyPem3"
+  default     = "AksArcAgentSshPrivateKeyPem"
   description = "The name of the secret in the key vault that contains the SSH private key PEM."
 }
 
@@ -347,7 +348,7 @@ variable "ssh_public_key" {
 
 variable "ssh_public_key_secret_name" {
   type        = string
-  default     = "AksArcAgentSshPublicKey3"
+  default     = "AksArcAgentSshPublicKey"
   description = "The name of the secret in the key vault that contains the SSH public key."
 }
 

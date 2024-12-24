@@ -131,6 +131,7 @@ resource "azapi_resource" "agent_pool" {
 
   type = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
   body = {
+    extendedLocation = local.extended_location_omit_null[count.index]
     extendedLocation = {
       name = var.custom_location_id
       type = "CustomLocation"

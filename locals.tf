@@ -24,6 +24,22 @@ locals {
   agent_pool_profiles = [for pool in var.agent_pool_profiles : {
     for k, v in pool : k => (k == "nodeTaints" ? flatten(v) : v) if v != null
   }]
+  extended_location_full = {
+    for idx, pool in var.additional_nodepools : idx => (
+      pool.original != true ? {
+        name = var.custom_location_id
+        type = "CustomLocation"
+        } : {
+        name = null
+        type = null
+      }
+    )
+  }
+  extended_location_omit_null = {
+    for k, v in local.extended_location_full : k => {
+      for key, val in v : key => val if val != null
+    }
+  }
   kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
   oidc_profile_full = var.enable_oidc_issuer != null ? {
     enabled = var.enable_oidc_issuer
