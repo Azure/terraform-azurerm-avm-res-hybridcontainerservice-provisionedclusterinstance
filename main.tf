@@ -26,7 +26,7 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azapi_resource" "connected_cluster" {
-  type = "Microsoft.Kubernetes/connectedClusters@2024-07-15-preview"
+  type = "Microsoft.Kubernetes/connectedClusters@2024-02-15-preview"
   body = {
     kind       = "ProvisionedCluster"
     properties = local.properties_with_nulls
