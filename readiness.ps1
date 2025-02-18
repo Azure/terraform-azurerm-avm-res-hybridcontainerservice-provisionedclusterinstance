@@ -34,7 +34,7 @@ while ($true) {
       --method PUT `
       --body $requestBody
   
-    sleep 60
+    sleep 300
     echo "Getting versions"
     $state = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET
     $state = "$state".Replace("`n", "").Replace("`r", "").Replace("`t", "").Replace(" ", "")
