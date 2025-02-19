@@ -96,4 +96,6 @@ locals {
   }
   security_profile_omit_null = var.enable_workload_identity == true ? { for k, v in local.security_profile_full : k => v if v.enabled != null } : null
   ssh_public_key             = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
+  is_windows                 = length(regexall("^[a-z]:", lower(abspath(path.root)))) > 0
+  program                    = local.is_windows ? "powershell.exe" : "pwsh"
 }
