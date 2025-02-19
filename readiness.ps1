@@ -15,7 +15,7 @@ while ($true) {
         az account set --subscription $env:ARM_SUBSCRIPTION_ID
     }
     # delete the default version to avoid unsynchronized state between ARM and on-prem
-    $accessToken = $(az account get-access-token --query accessToken)
+    $accessToken = $(az account get-access-token --query accessToken -o tsv)
     $url = "https://management.azure.com${customLocationResourceId}/providers/Microsoft.HybridContainerService/kubernetesVersions/default?api-version=2024-01-01"
     echo "Deleting default version to keep sync: $url"
     az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method DELETE
@@ -28,7 +28,7 @@ while ($true) {
     }
 
     Write-Host "After deleting, puting..."
-    $requestBody = '{\"extendedLocation\":{\"type\":\"CustomLocation\",\"name\":\"$customLocationResourceId\"}}'.Replace('$customLocationResourceId', $customLocationResourceId)
+    $requestBody = '{"extendedLocation":{"type":"CustomLocation","name":"'+$customLocationResourceId+'"}}'
     az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
       --uri $url `
       --method PUT `

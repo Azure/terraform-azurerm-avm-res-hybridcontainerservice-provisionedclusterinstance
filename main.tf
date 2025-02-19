@@ -114,6 +114,11 @@ resource "azapi_resource" "provisioned_cluster_instance" {
   name      = "default"
   parent_id = azapi_resource.connected_cluster.id
 
+  timeouts {
+    create = "2h"
+    update = "2h"
+  }
+
   depends_on = [azapi_resource.connected_cluster]
 
   lifecycle {
