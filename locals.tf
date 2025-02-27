@@ -42,6 +42,7 @@ locals {
       }
     )
   }
+  is_windows         = length(regexall("^[a-z]:", lower(abspath(path.root)))) > 0
   kubernetes_version = (var.kubernetes_version == null || var.kubernetes_version == "") ? "[PLACEHOLDER]" : var.kubernetes_version
   nodepool_bodies_full = {
     for k, v in local.extended_location_omit_null : k => {
@@ -63,6 +64,7 @@ locals {
   }
   oidc_profile_omit_null = var.enable_oidc_issuer == true ? { for k, v in local.oidc_profile_full : k => v if v != null } : null
   os_sku                 = var.agent_pool_profiles[0].osSKU
+  program                = local.is_windows ? "powershell.exe" : "pwsh"
   properties_full = {
     arcAgentProfile = {
       agentAutoUpgrade = "Enabled"
@@ -96,6 +98,4 @@ locals {
   }
   security_profile_omit_null = var.enable_workload_identity == true ? { for k, v in local.security_profile_full : k => v if v.enabled != null } : null
   ssh_public_key             = var.ssh_public_key == null ? tls_private_key.rsa_key[0].public_key_openssh : var.ssh_public_key
-  is_windows                 = length(regexall("^[a-z]:", lower(abspath(path.root)))) > 0
-  program                    = local.is_windows ? "powershell.exe" : "pwsh"
 }
