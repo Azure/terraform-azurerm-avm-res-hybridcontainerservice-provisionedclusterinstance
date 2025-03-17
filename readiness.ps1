@@ -28,7 +28,7 @@ while ($true) {
     }
 
     Write-Host "After deleting, puting..."
-    $requestBody = '{"extendedLocation":{"type":"CustomLocation","name":"'+$customLocationResourceId+'"}}'
+    $requestBody = "{'extendedLocation':{'type':'CustomLocation','name':'$customLocationResourceId'}}"
     az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
       --uri $url `
       --method PUT `
