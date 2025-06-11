@@ -10,8 +10,8 @@ resource "azurerm_key_vault_secret" "ssh_public_key" {
 
   key_vault_id = var.ssh_key_vault_id
   name         = var.ssh_public_key_secret_name
-  value        = tls_private_key.rsa_key[0].public_key_openssh
   tags         = {}
+  value        = tls_private_key.rsa_key[0].public_key_openssh
 }
 
 resource "azurerm_key_vault_secret" "ssh_private_key_pem" {
@@ -19,6 +19,6 @@ resource "azurerm_key_vault_secret" "ssh_private_key_pem" {
 
   key_vault_id = var.ssh_key_vault_id
   name         = var.ssh_private_key_pem_secret_name
-  value        = tls_private_key.rsa_key[0].private_key_pem
   tags         = {}
+  value        = tls_private_key.rsa_key[0].private_key_pem
 }
