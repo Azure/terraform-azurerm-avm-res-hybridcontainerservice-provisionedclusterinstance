@@ -6,9 +6,11 @@ configuration:
   branchProtectionRules:
     - branchNamePattern: "~default~"
       requiresPullRequestBeforeMerging: true
-      requiredApprovingReviewsCount: 0
+      requiredApprovingReviewsCount: 1
       isAdminEnforced: true
       allowsForcePushes: false
       allowsDeletions: false
       requiresLinearHistory: true
       requireCodeOwnersReview: true
+      requireLastPushApproval: true
+      dismissStaleReviews: true
