@@ -26,15 +26,15 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azapi_resource" "connected_cluster" {
-  type = "Microsoft.Kubernetes/connectedClusters@2024-07-15-preview"
+  location  = var.location
+  name      = var.name
+  parent_id = var.resource_group_id
+  type      = "Microsoft.Kubernetes/connectedClusters@2024-07-15-preview"
   body = {
     kind       = "ProvisionedCluster"
     properties = local.properties_with_nulls
   }
-  location  = var.location
-  name      = var.name
-  parent_id = var.resource_group_id
-  tags      = var.tags
+  tags = var.tags
 
   identity {
     type = "SystemAssigned"
@@ -59,7 +59,9 @@ resource "azapi_resource" "connected_cluster" {
 }
 
 resource "azapi_resource" "provisioned_cluster_instance" {
-  type = "Microsoft.HybridContainerService/provisionedClusterInstances@2024-01-01"
+  name      = "default"
+  parent_id = azapi_resource.connected_cluster.id
+  type      = "Microsoft.HybridContainerService/provisionedClusterInstances@2024-01-01"
   body = {
     extendedLocation = {
       name = var.custom_location_id
@@ -111,8 +113,6 @@ resource "azapi_resource" "provisioned_cluster_instance" {
       licenseProfile         = { azureHybridBenefit = var.azure_hybrid_benefit }
     }
   }
-  name      = "default"
-  parent_id = azapi_resource.connected_cluster.id
 
   timeouts {
     create = "2h"
@@ -134,10 +134,10 @@ resource "azapi_resource" "provisioned_cluster_instance" {
 resource "azapi_resource" "agent_pool" {
   count = length(var.additional_nodepools)
 
-  type      = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
-  body      = local.nodepool_bodies_omit_null[count.index]
   name      = var.additional_nodepools[count.index].name
   parent_id = resource.azapi_resource.provisioned_cluster_instance.id
+  type      = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
+  body      = local.nodepool_bodies_omit_null[count.index]
 
   lifecycle {
     ignore_changes = [
