@@ -34,7 +34,11 @@ resource "azapi_resource" "connected_cluster" {
     kind       = "ProvisionedCluster"
     properties = local.properties_with_nulls
   }
-  tags = var.tags
+  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  tags           = var.tags
+  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   identity {
     type = "SystemAssigned"
@@ -113,6 +117,10 @@ resource "azapi_resource" "provisioned_cluster_instance" {
       licenseProfile         = { azureHybridBenefit = var.azure_hybrid_benefit }
     }
   }
+  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   timeouts {
     create = "2h"
@@ -134,10 +142,14 @@ resource "azapi_resource" "provisioned_cluster_instance" {
 resource "azapi_resource" "agent_pool" {
   count = length(var.additional_nodepools)
 
-  name      = var.additional_nodepools[count.index].name
-  parent_id = resource.azapi_resource.provisioned_cluster_instance.id
-  type      = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
-  body      = local.nodepool_bodies_omit_null[count.index]
+  name           = var.additional_nodepools[count.index].name
+  parent_id      = resource.azapi_resource.provisioned_cluster_instance.id
+  type           = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
+  body           = local.nodepool_bodies_omit_null[count.index]
+  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   lifecycle {
     ignore_changes = [
