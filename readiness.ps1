@@ -14,42 +14,124 @@ while ($true) {
         az login --federated-token $token --tenant $env:ARM_TENANT_ID -u $env:ARM_CLIENT_ID --service-principal
         az account set --subscription $env:ARM_SUBSCRIPTION_ID
     }
-    # delete the default version to avoid unsynchronized state between ARM and on-prem
+    
+    # GET first, only PUT if 404
     $accessToken = $(az account get-access-token --query accessToken -o tsv)
     $url = "https://management.azure.com${customLocationResourceId}/providers/Microsoft.HybridContainerService/kubernetesVersions/default?api-version=2024-01-01"
-    echo "Deleting default version to keep sync: $url"
-    az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method DELETE
-    while ($true) {
-        $state = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET
-        if (-not $state) {
-            break
+    
+    Write-Host "Checking if kubernetesVersions resource already exists..."
+    $state = $null
+    $needsPut = $false
+    
+    $getResponse = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET 2>&1
+    
+    # Check if response contains error code
+    if ($LASTEXITCODE -ne 0) {
+        $errorString = $getResponse | Out-String
+        if ($errorString -match '\{.*\}') {
+            try {
+                $errorJson = $matches[0] | ConvertFrom-Json
+                if ($errorJson.error.code -eq 'ResourceNotFound') {
+                    Write-Host "Resource not found (error.code=ResourceNotFound), will create with PUT"
+                    $needsPut = $true
+                } else {
+                    Write-Error "GET request failed with error code: $($errorJson.error.code)"
+                    Write-Error "Error message: $($errorJson.error.message)"
+                    throw "Failed to get kubernetesVersions resource"
+                }
+            } catch {
+                Write-Error "Failed to parse error response: $errorString"
+                throw "Failed to get kubernetesVersions resource"
+            }
+        } else {
+            Write-Error "GET request failed with unexpected error: $errorString"
+            throw "Failed to get kubernetesVersions resource"
         }
-        sleep 5
+    } else {
+        $state = $getResponse | Out-String
+        
+        if ($state -and $state.Contains('"properties"')) {
+            $stateJson = $state | ConvertFrom-Json
+            $provisioningState = $stateJson.properties.provisioningState
+            
+            Write-Host "Resource exists with provisioningState: $provisioningState"
+            
+            if ($provisioningState -eq "Succeeded") {
+                Write-Host "Resource already in Succeeded state, skipping PUT"
+                $needsPut = $false
+            } else {
+                Write-Error "Resource exists but provisioningState is '$provisioningState' (not Succeeded)"
+                throw "KubernetesVersions resource is not in Succeeded state"
+            }
+        } else {
+            Write-Error "GET succeeded but response is invalid (no properties)"
+            throw "Invalid kubernetesVersions response"
+        }
     }
-
-    Write-Host "After deleting, puting..."
-    $requestBody = "{'extendedLocation':{'type':'CustomLocation','name':'$customLocationResourceId'}}"
-    az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
-      --uri $url `
-      --method PUT `
-      --body $requestBody
-  
-    sleep 300
-    echo "Getting versions"
-    $state = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET
+    
+    # Only PUT if we got 404
+    if ($needsPut) {
+        Write-Host "Creating kubernetesVersions resource..."
+        $requestBody = "{'extendedLocation':{'type':'CustomLocation','name':'$customLocationResourceId'}}"
+        az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" `
+          --uri $url `
+          --method PUT `
+          --body $requestBody
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "PUT request failed"
+            throw "Failed to create kubernetesVersions resource"
+        }
+      
+        # Wait for the resource to be fully provisioned after PUT
+        Write-Host "Waiting for kubernetesVersions resource to be available..."
+        $maxRetries = 15  # 5 minutes total (15 * 20 seconds)
+        $retryCount = 0
+        $state = $null
+        
+        while ($retryCount -lt $maxRetries) {
+            Start-Sleep -Seconds 20
+            $retryCount++
+            
+            Write-Host "Attempt $retryCount/$maxRetries - Getting versions..."
+            $getResponse = az rest --headers "Authorization=Bearer $accessToken" "Content-Type=application/json;charset=utf-8" --uri $url --method GET 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                $state = $getResponse | Out-String
+                
+                if ($state -and $state.Contains('"properties"')) {
+                    Write-Host "Resource is now available"
+                    break
+                }
+            } else {
+                $errorString = $getResponse | Out-String
+                if ($errorString -match '\{.*\}') {
+                    try {
+                        $errorJson = $matches[0] | ConvertFrom-Json
+                        if ($errorJson.error.code -eq 'ResourceNotFound') {
+                            Write-Host "Resource not yet available (error.code=ResourceNotFound), retrying..."
+                        } else {
+                            Write-Warning "Unexpected error during retry (error.code=$($errorJson.error.code)): $($errorJson.error.message)"
+                        }
+                    } catch {
+                        Write-Warning "Failed to parse error response during retry: $errorString"
+                    }
+                } else {
+                    Write-Warning "Unexpected error during retry: $errorString"
+                }
+            }
+        }
+        
+        if (-not $state -or $state.Length -eq 0 -or -not $state.Contains('"properties"')) {
+            Write-Error "Failed to get kubernetesVersions after $maxRetries attempts"
+            throw "Timeout waiting for kubernetesVersions resource"
+        }
+    }
+    
+    # Parse the response
     $state = "$state".Replace("`n", "").Replace("`r", "").Replace("`t", "").Replace(" ", "")
-    echo $state
-
-    $pos = $state.IndexOf("{")
-    $state = $state.Substring($pos)
-    $quotePos = $state.IndexOf('"')
-
-    # Workaround for warning messages in the CLI
-    if ($quotePos -gt 1) {
-        echo "workaround for warning messages in the CLI"
-        $state = $state.Substring($quotePos)
-        $state = "{$state"
-    }
+    Write-Host "Received response: $state"
+    
     $ready = $false
 
     # Default to the latest version
