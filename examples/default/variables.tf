@@ -8,11 +8,6 @@ variable "custom_location_name" {
   description = "The name of the custom location."
 }
 
-variable "keyvault_name" {
-  type        = string
-  description = "The name of the key vault."
-}
-
 variable "logical_network_name" {
   type        = string
   description = "The name of the logical network"
@@ -21,6 +16,11 @@ variable "logical_network_name" {
 variable "resource_group_name" {
   type        = string
   description = "The resource group where the resources will be deployed."
+}
+
+variable "subscription_id" {
+  type        = string
+  description = "The Azure subscription ID."
 }
 
 variable "additional_nodepools" {
@@ -97,6 +97,12 @@ variable "control_plane_ip" {
   description = "The IP address of the control plane"
 }
 
+variable "enable_azure_rbac" {
+  type        = bool
+  default     = false
+  description = "Enable Azure RBAC for the kubernetes cluster"
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -107,8 +113,37 @@ If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
 
+variable "keyvault_name" {
+  type        = string
+  default     = null
+  description = "The name of the key vault. Only required if ssh_public_key is not provided."
+}
+
+variable "kubernetes_version" {
+  type        = string
+  default     = ""
+  description = "The kubernetes version"
+
+  validation {
+    condition     = var.kubernetes_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
+    error_message = "kubernetes_version must be in the format of 'x.y.z'"
+  }
+}
+
+variable "location" {
+  type        = string
+  default     = "eastus"
+  description = "The Azure region where the cluster will be deployed."
+}
+
 variable "rbac_admin_group_object_ids" {
   type        = list(string)
   default     = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
   description = "The object IDs of the Azure AD groups that will be granted admin access to the Kubernetes cluster."
+}
+
+variable "ssh_public_key" {
+  type        = string
+  default     = null
+  description = "The SSH public key for cluster node access. If not provided, keys will be auto-generated and stored in Key Vault (requires keyvault_name)."
 }
