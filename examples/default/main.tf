@@ -50,7 +50,7 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # This is the module call
 # Location is set via variable to match the custom location and logical network
 module "test" {
-  source = "../../"
+  source = "github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance"
 
   agent_pool_profiles         = var.agent_pool_profiles
   custom_location_id          = data.azapi_resource.customlocation.id
