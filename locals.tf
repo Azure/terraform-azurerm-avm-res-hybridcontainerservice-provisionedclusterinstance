@@ -82,10 +82,6 @@ locals {
     infrastructure     = null
     distribution       = null
   })
-  # The resource group name is the last element of the split result
-  resource_group_name = element(local.resource_group_parts, length(local.resource_group_parts) - 1)
-  # Split the resource group ID into parts based on '/'
-  resource_group_parts               = split("/", var.resource_group_id)
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
   security_profile_full = var.enable_workload_identity != null ? {
     workloadIdentity = {

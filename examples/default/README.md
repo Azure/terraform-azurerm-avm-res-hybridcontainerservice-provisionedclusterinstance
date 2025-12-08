@@ -21,7 +21,7 @@ terraform {
 }
 
 provider "azurerm" {
-  subscription_id = "0000000-0000-00000-000000"
+  subscription_id = var.subscription_id
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -46,30 +46,33 @@ data "azapi_resource" "logical_network" {
   type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
 }
 
+# Only used if ssh_public_key is not provided
 data "azurerm_key_vault" "deployment_key_vault" {
+  count = var.ssh_public_key == null && var.keyvault_name != null ? 1 : 0
+
   name                = var.keyvault_name
   resource_group_name = var.resource_group_name
 }
 
 # This is the module call
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
+# Location is set via variable to match the custom location and logical network
 module "test" {
   source = "../../"
 
   agent_pool_profiles         = var.agent_pool_profiles
   custom_location_id          = data.azapi_resource.customlocation.id
-  location                    = data.azurerm_resource_group.rg.location
+  location                    = var.location
   logical_network_id          = data.azapi_resource.logical_network.id
   name                        = var.aks_arc_name
   resource_group_id           = data.azurerm_resource_group.rg.id
   additional_nodepools        = var.additional_nodepools
   control_plane_count         = var.control_plane_count
   control_plane_ip            = var.control_plane_ip
+  enable_azure_rbac           = var.enable_azure_rbac
   enable_telemetry            = var.enable_telemetry # see variables.tf
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
-  ssh_key_vault_id            = data.azurerm_key_vault.deployment_key_vault.id
+  ssh_key_vault_id            = var.ssh_public_key == null && var.keyvault_name != null ? data.azurerm_key_vault.deployment_key_vault[0].id : null
+  ssh_public_key              = var.ssh_public_key
 }
 ```
 
@@ -110,12 +113,6 @@ Description: The name of the custom location.
 
 Type: `string`
 
-### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
-
-Description: The name of the key vault.
-
-Type: `string`
-
 ### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
 
 Description: The name of the logical network
@@ -125,6 +122,12 @@ Type: `string`
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
 Description: The resource group where the resources will be deployed.
+
+Type: `string`
+
+### <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id)
+
+Description: The Azure subscription ID.
 
 Type: `string`
 
@@ -231,6 +234,14 @@ Type: `string`
 
 Default: `"192.168.1.190"`
 
+### <a name="input_enable_azure_rbac"></a> [enable\_azure\_rbac](#input\_enable\_azure\_rbac)
+
+Description: Enable Azure RBAC for the kubernetes cluster
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
 Description: This variable controls whether or not telemetry is enabled for the module.  
@@ -240,6 +251,22 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
+
+Description: The name of the key vault. Only required if ssh\_public\_key is not provided.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_location"></a> [location](#input\_location)
+
+Description: The Azure region where the cluster will be deployed.
+
+Type: `string`
+
+Default: `"eastus"`
 
 ### <a name="input_rbac_admin_group_object_ids"></a> [rbac\_admin\_group\_object\_ids](#input\_rbac\_admin\_group\_object\_ids)
 
@@ -254,6 +281,14 @@ Default:
   "ed888f99-66c1-48fe-992f-030f49ba50ed"
 ]
 ```
+
+### <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key)
+
+Description: The SSH public key for cluster node access. If not provided, keys will be auto-generated and stored in Key Vault (requires keyvault\_name).
+
+Type: `string`
+
+Default: `null`
 
 ## Outputs
 
