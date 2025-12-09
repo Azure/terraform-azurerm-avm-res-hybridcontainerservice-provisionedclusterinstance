@@ -97,6 +97,30 @@ variable "control_plane_ip" {
   description = "The IP address of the control plane"
 }
 
+variable "control_plane_vm_size" {
+  type        = string
+  default     = "Standard_A4_v2"
+  description = "The size of the control plane VM"
+}
+
+variable "azure_hybrid_benefit" {
+  type        = string
+  default     = "False"
+  description = "The Azure Hybrid Benefit for the kubernetes cluster."
+}
+
+variable "nfs_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the NFS CSI driver for the kubernetes cluster."
+}
+
+variable "smb_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SMB CSI driver for the kubernetes cluster."
+}
+
 variable "enable_azure_rbac" {
   type        = bool
   default     = false
