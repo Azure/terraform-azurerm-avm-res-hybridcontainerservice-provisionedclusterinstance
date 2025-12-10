@@ -85,6 +85,12 @@ variable "agent_pool_profiles" {
   description = "The agent pool profiles for the Kubernetes cluster."
 }
 
+variable "azure_hybrid_benefit" {
+  type        = string
+  default     = "False"
+  description = "The Azure Hybrid Benefit for the kubernetes cluster."
+}
+
 variable "control_plane_count" {
   type        = number
   default     = 1
@@ -95,6 +101,12 @@ variable "control_plane_ip" {
   type        = string
   default     = "192.168.1.190"
   description = "The IP address of the control plane"
+}
+
+variable "control_plane_vm_size" {
+  type        = string
+  default     = "Standard_A4_v2"
+  description = "The size of the control plane VM"
 }
 
 variable "enable_azure_rbac" {
@@ -136,10 +148,22 @@ variable "location" {
   description = "The Azure region where the cluster will be deployed."
 }
 
+variable "nfs_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the NFS CSI driver for the kubernetes cluster."
+}
+
 variable "rbac_admin_group_object_ids" {
   type        = list(string)
   default     = ["ed888f99-66c1-48fe-992f-030f49ba50ed"]
   description = "The object IDs of the Azure AD groups that will be granted admin access to the Kubernetes cluster."
+}
+
+variable "smb_csi_driver_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SMB CSI driver for the kubernetes cluster."
 }
 
 variable "ssh_public_key" {

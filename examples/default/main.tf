@@ -50,7 +50,7 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # This is the module call
 # Location is set via variable to match the custom location and logical network
 module "test" {
-  source = "../../"
+  source = "github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance"
 
   agent_pool_profiles         = var.agent_pool_profiles
   custom_location_id          = data.azapi_resource.customlocation.id
@@ -59,12 +59,16 @@ module "test" {
   name                        = var.aks_arc_name
   resource_group_id           = data.azurerm_resource_group.rg.id
   additional_nodepools        = var.additional_nodepools
+  azure_hybrid_benefit        = var.azure_hybrid_benefit
   control_plane_count         = var.control_plane_count
   control_plane_ip            = var.control_plane_ip
+  control_plane_vm_size       = var.control_plane_vm_size
   enable_azure_rbac           = var.enable_azure_rbac
   enable_telemetry            = var.enable_telemetry # see variables.tf
   kubernetes_version          = var.kubernetes_version
+  nfs_csi_driver_enabled      = var.nfs_csi_driver_enabled
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
+  smb_csi_driver_enabled      = var.smb_csi_driver_enabled
   ssh_key_vault_id            = var.ssh_public_key == null && var.keyvault_name != null ? data.azurerm_key_vault.deployment_key_vault[0].id : null
   ssh_public_key              = var.ssh_public_key
 }

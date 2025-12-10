@@ -57,7 +57,7 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # This is the module call
 # Location is set via variable to match the custom location and logical network
 module "test" {
-  source = "../../"
+  source = "github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance"
 
   agent_pool_profiles         = var.agent_pool_profiles
   custom_location_id          = data.azapi_resource.customlocation.id
@@ -66,11 +66,16 @@ module "test" {
   name                        = var.aks_arc_name
   resource_group_id           = data.azurerm_resource_group.rg.id
   additional_nodepools        = var.additional_nodepools
+  azure_hybrid_benefit        = var.azure_hybrid_benefit
   control_plane_count         = var.control_plane_count
   control_plane_ip            = var.control_plane_ip
+  control_plane_vm_size       = var.control_plane_vm_size
   enable_azure_rbac           = var.enable_azure_rbac
   enable_telemetry            = var.enable_telemetry # see variables.tf
+  kubernetes_version          = var.kubernetes_version
+  nfs_csi_driver_enabled      = var.nfs_csi_driver_enabled
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
+  smb_csi_driver_enabled      = var.smb_csi_driver_enabled
   ssh_key_vault_id            = var.ssh_public_key == null && var.keyvault_name != null ? data.azurerm_key_vault.deployment_key_vault[0].id : null
   ssh_public_key              = var.ssh_public_key
 }
@@ -218,6 +223,14 @@ Default:
 ]
 ```
 
+### <a name="input_azure_hybrid_benefit"></a> [azure\_hybrid\_benefit](#input\_azure\_hybrid\_benefit)
+
+Description: The Azure Hybrid Benefit for the kubernetes cluster.
+
+Type: `string`
+
+Default: `"False"`
+
 ### <a name="input_control_plane_count"></a> [control\_plane\_count](#input\_control\_plane\_count)
 
 Description: The count of the control plane
@@ -233,6 +246,14 @@ Description: The IP address of the control plane
 Type: `string`
 
 Default: `"192.168.1.190"`
+
+### <a name="input_control_plane_vm_size"></a> [control\_plane\_vm\_size](#input\_control\_plane\_vm\_size)
+
+Description: The size of the control plane VM
+
+Type: `string`
+
+Default: `"Standard_A4_v2"`
 
 ### <a name="input_enable_azure_rbac"></a> [enable\_azure\_rbac](#input\_enable\_azure\_rbac)
 
@@ -260,6 +281,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version)
+
+Description: The kubernetes version
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_location"></a> [location](#input\_location)
 
 Description: The Azure region where the cluster will be deployed.
@@ -267,6 +296,14 @@ Description: The Azure region where the cluster will be deployed.
 Type: `string`
 
 Default: `"eastus"`
+
+### <a name="input_nfs_csi_driver_enabled"></a> [nfs\_csi\_driver\_enabled](#input\_nfs\_csi\_driver\_enabled)
+
+Description: Enable the NFS CSI driver for the kubernetes cluster.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_rbac_admin_group_object_ids"></a> [rbac\_admin\_group\_object\_ids](#input\_rbac\_admin\_group\_object\_ids)
 
@@ -281,6 +318,14 @@ Default:
   "ed888f99-66c1-48fe-992f-030f49ba50ed"
 ]
 ```
+
+### <a name="input_smb_csi_driver_enabled"></a> [smb\_csi\_driver\_enabled](#input\_smb\_csi\_driver\_enabled)
+
+Description: Enable the SMB CSI driver for the kubernetes cluster.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key)
 
@@ -300,7 +345,7 @@ The following Modules are called:
 
 ### <a name="module_test"></a> [test](#module\_test)
 
-Source: ../../
+Source: github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance
 
 Version:
 
