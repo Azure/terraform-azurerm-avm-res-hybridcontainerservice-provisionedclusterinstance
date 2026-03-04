@@ -58,6 +58,7 @@ resource "azapi_resource" "connected_cluster" {
       body.properties.infrastructure,
       body.properties.privateLinkState,
       body.properties.provisioningState,
+      output.properties.lastConnectivityTime,
     ]
   }
 }
