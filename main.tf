@@ -44,12 +44,6 @@ resource "azapi_resource" "connected_cluster" {
     type = "SystemAssigned"
   }
 
-  depends_on = [
-    azurerm_key_vault_secret.ssh_public_key,
-    azurerm_key_vault_secret.ssh_private_key_pem,
-    terraform_data.wait_aks_vhd_ready,
-  ]
-
   lifecycle {
     ignore_changes = [
       identity[0],
@@ -61,6 +55,11 @@ resource "azapi_resource" "connected_cluster" {
       output.properties.lastConnectivityTime,
     ]
   }
+  depends_on = [
+    azurerm_key_vault_secret.ssh_public_key,
+    azurerm_key_vault_secret.ssh_private_key_pem,
+    terraform_data.wait_aks_vhd_ready,
+  ]
 }
 
 resource "azapi_resource" "provisioned_cluster_instance" {
@@ -128,8 +127,6 @@ resource "azapi_resource" "provisioned_cluster_instance" {
     update = "2h"
   }
 
-  depends_on = [azapi_resource.connected_cluster]
-
   lifecycle {
     ignore_changes = [
       body.properties.autoScalerProfile,
@@ -138,6 +135,7 @@ resource "azapi_resource" "provisioned_cluster_instance" {
       body.properties.provisioningStateUpdatedTime,
     ]
   }
+  depends_on = [azapi_resource.connected_cluster]
 }
 
 resource "azapi_resource" "agent_pool" {
