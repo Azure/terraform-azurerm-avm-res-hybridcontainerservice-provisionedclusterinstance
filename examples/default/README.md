@@ -71,7 +71,7 @@ module "test" {
   control_plane_ip            = var.control_plane_ip
   control_plane_vm_size       = var.control_plane_vm_size
   enable_azure_rbac           = var.enable_azure_rbac
-  enable_telemetry            = false # see variables.tf
+  enable_telemetry            = var.enable_telemetry # see variables.tf
   kubernetes_version          = var.kubernetes_version
   nfs_csi_driver_enabled      = var.nfs_csi_driver_enabled
   rbac_admin_group_object_ids = var.rbac_admin_group_object_ids
@@ -271,7 +271,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ### <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name)
 
