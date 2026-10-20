@@ -6,17 +6,18 @@ mock_provider "azapi" {
       tags = {}
     }
   }
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
 }
 
 mock_provider "azurerm" {
   alias = "mock"
 }
 
-mock_provider "modtm" {
-  alias = "mock"
-}
-
-mock_provider "random" {
+mock_provider "terraform" {
   alias = "mock"
 }
 
@@ -63,11 +64,10 @@ run "propagates_tags_without_changing_node_configuration" {
   command = apply
 
   providers = {
-    azapi   = azapi.mock
-    azurerm = azurerm.mock
-    modtm   = modtm.mock
-    random  = random.mock
-    tls     = tls.mock
+    azapi     = azapi.mock
+    azurerm   = azurerm.mock
+    terraform = terraform.mock
+    tls       = tls.mock
   }
 
   variables {
@@ -90,7 +90,7 @@ run "propagates_tags_without_changing_node_configuration" {
   }
 
   assert {
-    condition     = length(terraform_data.wait_aks_vhd_ready) == 0 && length(modtm_telemetry.telemetry) == 0 && length(tls_private_key.rsa_key) == 0
+    condition     = length(terraform_data.wait_aks_vhd_ready) == 0 && length(azapi_resource.telemetry) == 0 && length(terraform_data.telemetry) == 0 && length(tls_private_key.rsa_key) == 0
     error_message = "This mocked test must not invoke readiness, telemetry, or key generation."
   }
 }
@@ -100,11 +100,10 @@ run "preserves_no_tags_when_omitted" {
   state_key = "omitted_tags"
 
   providers = {
-    azapi   = azapi.mock
-    azurerm = azurerm.mock
-    modtm   = modtm.mock
-    random  = random.mock
-    tls     = tls.mock
+    azapi     = azapi.mock
+    azurerm   = azurerm.mock
+    terraform = terraform.mock
+    tls       = tls.mock
   }
 
   assert {
@@ -118,11 +117,10 @@ run "preserves_empty_tags" {
   state_key = "empty_tags"
 
   providers = {
-    azapi   = azapi.mock
-    azurerm = azurerm.mock
-    modtm   = modtm.mock
-    random  = random.mock
-    tls     = tls.mock
+    azapi     = azapi.mock
+    azurerm   = azurerm.mock
+    terraform = terraform.mock
+    tls       = tls.mock
   }
 
   variables {
