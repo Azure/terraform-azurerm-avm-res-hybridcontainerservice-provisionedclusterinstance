@@ -10,9 +10,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
-    terraform = {
-      source = "terraform.io/builtin/terraform"
-    }
     tls = {
       source  = "hashicorp/tls"
       version = ">= 3.1"
