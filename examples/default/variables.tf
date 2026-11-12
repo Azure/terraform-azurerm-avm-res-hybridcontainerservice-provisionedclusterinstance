@@ -3,16 +3,6 @@ variable "aks_arc_name" {
   description = "The name of the hybrid aks"
 }
 
-variable "custom_location_name" {
-  type        = string
-  description = "The name of the custom location."
-}
-
-variable "logical_network_name" {
-  type        = string
-  description = "The name of the logical network"
-}
-
 variable "resource_group_name" {
   type        = string
   description = "The resource group where the resources will be deployed."
@@ -109,6 +99,28 @@ variable "control_plane_vm_size" {
   description = "The size of the control plane VM"
 }
 
+variable "custom_location_id" {
+  type        = string
+  default     = null
+  description = "The ARM resource ID of the custom location. When set, the example uses it directly instead of looking it up by name."
+
+  validation {
+    condition     = var.custom_location_id == null || can(provider::azapi::parse_resource_id("Microsoft.ExtendedLocation/customLocations", var.custom_location_id))
+    error_message = "`custom_location_id` must be a valid custom location resource ID or null."
+  }
+}
+
+variable "custom_location_name" {
+  type        = string
+  default     = null
+  description = "The name of an existing custom location. Required unless `custom_location_id` is set."
+
+  validation {
+    condition     = var.custom_location_id != null ? true : (var.custom_location_name == null ? false : trimspace(var.custom_location_name) != "")
+    error_message = "Set `custom_location_name` when `custom_location_id` is not provided."
+  }
+}
+
 variable "enable_azure_rbac" {
   type        = bool
   default     = false
@@ -146,6 +158,28 @@ variable "location" {
   type        = string
   default     = "eastus"
   description = "The Azure region where the cluster will be deployed."
+}
+
+variable "logical_network_id" {
+  type        = string
+  default     = null
+  description = "The ARM resource ID of the logical network. When set, the example uses it directly instead of looking it up by name."
+
+  validation {
+    condition     = var.logical_network_id == null || can(provider::azapi::parse_resource_id("Microsoft.AzureStackHCI/logicalNetworks", var.logical_network_id))
+    error_message = "`logical_network_id` must be a valid logical network resource ID or null."
+  }
+}
+
+variable "logical_network_name" {
+  type        = string
+  default     = null
+  description = "The name of an existing logical network. Required unless `logical_network_id` is set."
+
+  validation {
+    condition     = var.logical_network_id != null ? true : (var.logical_network_name == null ? false : trimspace(var.logical_network_name) != "")
+    error_message = "Set `logical_network_name` when `logical_network_id` is not provided."
+  }
 }
 
 variable "nfs_csi_driver_enabled" {

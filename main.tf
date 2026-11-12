@@ -137,6 +137,7 @@ resource "azapi_resource" "agent_pool" {
   parent_id = resource.azapi_resource.provisioned_cluster_instance.id
   type      = "Microsoft.HybridContainerService/provisionedClusterInstances/agentPools@2024-01-01"
   body      = local.nodepool_bodies_omit_null[count.index]
+  tags      = var.tags
 
   lifecycle {
     ignore_changes = [

@@ -4,6 +4,8 @@
 
 This deploys the module in its simplest form.
 
+Direct custom-location and logical-network IDs can be provided to bypass name lookups during policy-only planning. Synthetic IDs used by the `pr-check` environment do not establish that those resources exist and must not be used for deployment; deployment and E2E require real existing resources.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -11,7 +13,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "azure/azapi"
-      version = "~> 2.0"
+      version = "~> 2.12"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -29,20 +31,19 @@ provider "azurerm" {
   }
 }
 
-# This is required for resource modules
-data "azurerm_resource_group" "rg" {
-  name = var.resource_group_name
-}
-
 data "azapi_resource" "customlocation" {
-  name      = var.custom_location_name
-  parent_id = data.azurerm_resource_group.rg.id
+  for_each = var.custom_location_id == null ? { lookup = var.custom_location_name } : {}
+
+  name      = each.value
+  parent_id = local.resource_group_id
   type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
 }
 
 data "azapi_resource" "logical_network" {
-  name      = var.logical_network_name
-  parent_id = data.azurerm_resource_group.rg.id
+  for_each = var.logical_network_id == null ? { lookup = var.logical_network_name } : {}
+
+  name      = each.value
+  parent_id = local.resource_group_id
   type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
 }
 
@@ -57,14 +58,14 @@ data "azurerm_key_vault" "deployment_key_vault" {
 # This is the module call
 # Location is set via variable to match the custom location and logical network
 module "test" {
-  source = "github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance"
+  source = "../.."
 
   agent_pool_profiles         = var.agent_pool_profiles
-  custom_location_id          = data.azapi_resource.customlocation.id
+  custom_location_id          = local.effective_custom_location_id
   location                    = var.location
-  logical_network_id          = data.azapi_resource.logical_network.id
+  logical_network_id          = local.effective_logical_network_id
   name                        = var.aks_arc_name
-  resource_group_id           = data.azurerm_resource_group.rg.id
+  resource_group_id           = local.resource_group_id
   additional_nodepools        = var.additional_nodepools
   azure_hybrid_benefit        = var.azure_hybrid_benefit
   control_plane_count         = var.control_plane_count
@@ -88,7 +89,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.0)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.12)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
@@ -99,7 +100,6 @@ The following resources are used by this module:
 - [azapi_resource.customlocation](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
 - [azapi_resource.logical_network](https://registry.terraform.io/providers/azure/azapi/latest/docs/data-sources/resource) (data source)
 - [azurerm_key_vault.deployment_key_vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) (data source)
-- [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -109,18 +109,6 @@ The following input variables are required:
 ### <a name="input_aks_arc_name"></a> [aks\_arc\_name](#input\_aks\_arc\_name)
 
 Description: The name of the hybrid aks
-
-Type: `string`
-
-### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
-
-Description: The name of the custom location.
-
-Type: `string`
-
-### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
-
-Description: The name of the logical network
 
 Type: `string`
 
@@ -255,6 +243,22 @@ Type: `string`
 
 Default: `"Standard_A4_v2"`
 
+### <a name="input_custom_location_id"></a> [custom\_location\_id](#input\_custom\_location\_id)
+
+Description: The ARM resource ID of the custom location. When set, the example uses it directly instead of looking it up by name.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_custom_location_name"></a> [custom\_location\_name](#input\_custom\_location\_name)
+
+Description: The name of an existing custom location. Required unless `custom_location_id` is set.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_enable_azure_rbac"></a> [enable\_azure\_rbac](#input\_enable\_azure\_rbac)
 
 Description: Enable Azure RBAC for the kubernetes cluster
@@ -296,6 +300,22 @@ Description: The Azure region where the cluster will be deployed.
 Type: `string`
 
 Default: `"eastus"`
+
+### <a name="input_logical_network_id"></a> [logical\_network\_id](#input\_logical\_network\_id)
+
+Description: The ARM resource ID of the logical network. When set, the example uses it directly instead of looking it up by name.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_logical_network_name"></a> [logical\_network\_name](#input\_logical\_network\_name)
+
+Description: The name of an existing logical network. Required unless `logical_network_id` is set.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_nfs_csi_driver_enabled"></a> [nfs\_csi\_driver\_enabled](#input\_nfs\_csi\_driver\_enabled)
 
@@ -345,7 +365,7 @@ The following Modules are called:
 
 ### <a name="module_test"></a> [test](#module\_test)
 
-Source: github.com/Azure/terraform-azurerm-avm-res-hybridcontainerservice-provisionedclusterinstance
+Source: ../..
 
 Version:
 
