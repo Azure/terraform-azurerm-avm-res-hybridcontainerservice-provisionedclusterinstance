@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "azure/azapi"
-      version = "~> 2.0"
+      version = "~> 2.12"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -22,20 +22,19 @@ provider "azurerm" {
   }
 }
 
-# This is required for resource modules
-data "azurerm_resource_group" "rg" {
-  name = var.resource_group_name
-}
-
 data "azapi_resource" "customlocation" {
-  name      = var.custom_location_name
-  parent_id = data.azurerm_resource_group.rg.id
+  for_each = var.custom_location_id == null ? { lookup = var.custom_location_name } : {}
+
+  name      = each.value
+  parent_id = local.resource_group_id
   type      = "Microsoft.ExtendedLocation/customLocations@2021-08-15"
 }
 
 data "azapi_resource" "logical_network" {
-  name      = var.logical_network_name
-  parent_id = data.azurerm_resource_group.rg.id
+  for_each = var.logical_network_id == null ? { lookup = var.logical_network_name } : {}
+
+  name      = each.value
+  parent_id = local.resource_group_id
   type      = "Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview"
 }
 
@@ -53,11 +52,11 @@ module "test" {
   source = "../.."
 
   agent_pool_profiles         = var.agent_pool_profiles
-  custom_location_id          = data.azapi_resource.customlocation.id
+  custom_location_id          = local.effective_custom_location_id
   location                    = var.location
-  logical_network_id          = data.azapi_resource.logical_network.id
+  logical_network_id          = local.effective_logical_network_id
   name                        = var.aks_arc_name
-  resource_group_id           = data.azurerm_resource_group.rg.id
+  resource_group_id           = local.resource_group_id
   additional_nodepools        = var.additional_nodepools
   azure_hybrid_benefit        = var.azure_hybrid_benefit
   control_plane_count         = var.control_plane_count
